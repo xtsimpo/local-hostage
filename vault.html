@@ -1,0 +1,1506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-K5p2D0JQsSD1/X/WQ3vN7JYSFfH9TcXm0yCGs74RM3A='; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Local Hostage</title>
+<style>
+:root{--bg:#F4F2EE;--surface:#FFFFFF;--ink:#1B1D1F;--ink2:#3F4246;--muted:#5E6167;--line:#E2DED6;--line2:#EEEBE4;--field:#D6D1C7;--accent:#0F6B5C;--accent-hover:#0A4F44;--on-accent:#FFFFFF;--accent-soft:#E6EFEC;--accent-soft-ink:#1D3A34;--chip:#E9E5DD;--hover:#ECE9E3;--warn-bg:#FBF0DA;--warn-ink:#6E4700;--danger:#A02A1E;--star:#B7791F;--toast-bg:#1B1D1F;--toast-ink:#FFFFFF;--shadow:0 24px 64px rgba(27,29,31,.3);--sans:"Commissioner","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;--mono:"JetBrains Mono",ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#151617;--surface:#1E2022;--ink:#ECEAE6;--ink2:#C9CBCF;--muted:#A3A6AB;--line:#2E3134;--line2:#26292B;--field:#3A3D41;--accent:#4FB8A3;--accent-hover:#6CCAB6;--on-accent:#0B1F1B;--accent-soft:#1B302C;--accent-soft-ink:#BFE3DA;--chip:#2C2F32;--hover:#25282A;--warn-bg:#3A2E14;--warn-ink:#F1CF8A;--danger:#F08A7E;--star:#E3B04B;--toast-bg:#ECEAE6;--toast-ink:#1B1D1F;--shadow:0 24px 64px rgba(0,0,0,.55);color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+svg.i{flex-shrink:0;display:block}
+.hint{font-size:12px;color:var(--muted)}
+.err{margin:0;color:var(--danger);font-size:13px;font-weight:600}
+.err:empty{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.btn.danger{color:var(--danger)}
+.btn.lg{height:52px;font-size:16px;border-radius:10px}
+.btn.md{height:44px;font-size:14px;border-radius:10px}
+.btn:disabled{opacity:.6;cursor:default}
+.icon-btn{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;border-radius:8px;color:var(--muted);flex-shrink:0}
+.icon-btn:hover{background:var(--hover);color:var(--ink)}
+.icon-btn.solid{background:var(--accent);color:var(--on-accent)}
+.icon-btn.solid:hover{background:var(--accent-hover);color:var(--on-accent)}
+.icon-btn.boxed{border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.kbd{font-family:var(--mono);font-size:11px;font-weight:500;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--muted)}
+.btn.primary .kbd,.btn.dark .kbd{border-color:currentColor;color:inherit;opacity:.75}
+.tile{width:32px;height:32px;border-radius:8px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:999px;background:var(--chip);font-size:12px;border:0;color:var(--ink)}
+button.chip:hover{background:var(--hover)}
+.chip.on{background:var(--accent);color:var(--on-accent)}
+.badge{font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--chip);color:var(--ink2);white-space:nowrap}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:10px;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand b{font-size:20px;letter-spacing:-.01em;display:block}
+.brand small{display:block;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label{font-size:13px;font-weight:600}
+.input{height:44px;padding:0 12px;border:1px solid var(--field);border-radius:8px;background:var(--surface);width:100%}
+.input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.input:disabled{background:var(--bg);color:var(--muted)}
+textarea.input{height:auto;padding:10px 12px;resize:vertical;min-height:72px;line-height:1.5}
+.input-wrap{display:flex;align-items:center;gap:4px;height:44px;padding:0 4px 0 12px;border:1px solid var(--field);border-radius:8px;background:var(--surface)}
+.input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.input-wrap input{flex:1;min-width:0;border:0;outline:0;background:transparent;height:100%}
+.input-wrap.big{height:52px;border-radius:10px}
+.note{display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:10px;font-size:13px;background:var(--accent-soft);color:var(--accent-soft-ink)}
+.note.warn{background:var(--warn-bg);color:var(--warn-ink);align-items:center}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:13px;cursor:pointer}
+.check input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--accent);flex-shrink:0}
+
+.lock{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px}
+.lock-card{width:100%;max-width:440px;display:flex;flex-direction:column;gap:22px}
+.lock h1{margin:0;font-size:32px;line-height:1.15;letter-spacing:-.02em}
+.lead{margin:0;font-size:15px;color:var(--muted)}
+
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr) 360px;height:100vh}
+.side{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:20px;overflow:auto}
+.side .brand{justify-content:space-between;padding:0 6px}
+.side .brand>div{display:flex;align-items:center;gap:10px}
+.side .logo{width:30px;height:30px;border-radius:8px}
+.side .brand b{font-size:17px}
+.navgrp{display:flex;flex-direction:column;gap:2px}
+.navhead{padding:0 10px 6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.nav-item{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;text-align:left;width:100%}
+.nav-item:hover{background:var(--hover)}
+.nav-item.active{background:var(--surface);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.nav-item .n{color:var(--muted);font-weight:500;font-size:12px;font-family:var(--sans)}
+.nav-item.mono{font-family:var(--mono);font-size:13px}
+.nav-item.sub{min-height:30px;padding-left:26px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.nav-item.sub.active{color:var(--ink)}
+.nav-item>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.side-foot .btn{justify-content:flex-start}
+
+.main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.topbar{display:flex;gap:10px;align-items:center;padding:18px 20px 14px}
+.search{flex:1;min-width:0;height:44px;display:flex;align-items:center;gap:10px;padding:0 12px 0 14px;background:var(--surface);border:1px solid var(--field);border-radius:10px;color:var(--muted)}
+.search:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink)}
+.search input::-webkit-search-cancel-button{display:none}
+.banner{margin:0 20px 14px}
+.banner[hidden]{display:none}
+.list{flex:1;overflow:auto;padding:0 20px 20px;display:flex;flex-direction:column;gap:14px}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;flex-shrink:0}
+.group-head{display:flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-bottom:1px solid var(--line2)}
+.gname{font-weight:600;font-size:13px}
+.gname.mono{font-weight:500}
+.gmeta{font-size:12px;color:var(--muted)}
+.row{display:flex;align-items:center;gap:2px;padding-right:10px;border-top:1px solid var(--line2)}
+.group-head+.row{border-top:0}
+.row.sel{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.row:not(.sel):hover{background:var(--hover)}
+.row-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;height:56px;padding:0 4px 0 14px;border:0;background:transparent;text-align:left}
+.row-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.row-name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
+.row-name>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-url{font-family:var(--mono);font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-user{width:170px;font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.row.sel .badge{background:var(--surface)}
+.empty{margin:auto;max-width:380px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;padding:40px 0;color:var(--muted)}
+.empty h2{margin:0;font-size:20px;color:var(--ink)}
+.empty p{margin:0}
+.foot{display:flex;align-items:center;gap:16px;min-height:52px;padding:8px 20px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap}
+.foot .sec{display:flex;align-items:center;gap:6px}
+.foot .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.foot .ok{display:flex;align-items:center;gap:6px}
+.pill-warn{padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn-ink);font-weight:600}
+.foot .btn{height:34px}
+
+.detail{background:var(--surface);border-left:1px solid var(--line);padding:22px;display:flex;flex-direction:column;gap:18px;overflow:auto}
+.d-head{display:flex;align-items:flex-start;gap:12px}
+.d-head .tile{width:44px;height:44px;border-radius:10px;font-size:18px}
+.d-title{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.d-title h2{margin:0;font-size:20px;overflow-wrap:anywhere}
+.linkbtn{border:0;background:none;padding:0;color:var(--accent);font-family:var(--mono);font-size:12px;display:inline-flex;align-items:center;gap:4px;text-align:left;overflow-wrap:anywhere}
+.linkbtn:hover{text-decoration:underline}
+.d-url{font-family:var(--mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.star.on{color:var(--star)}
+.tabs{display:flex;gap:4px;padding:4px;background:var(--bg);border-radius:10px}
+.tab{flex:1;min-width:0;height:34px;border:0;border-radius:7px;background:transparent;font-size:13px;font-weight:500;color:var(--ink2);padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tab[aria-selected="true"]{background:var(--surface);font-weight:600;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.tabs .icon-btn{width:34px;height:34px}
+.dfield{display:flex;flex-direction:column;gap:6px}
+.dlabel{font-size:12px;font-weight:600;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.dlabel span{font-weight:500}
+.dval{display:flex;align-items:center;min-height:44px;padding:0 6px 0 12px;border:1px solid var(--line);border-radius:8px;gap:2px}
+.dval .v{flex:1;min-width:0;font-family:var(--mono);font-size:14px;overflow-wrap:anywhere;padding:8px 0}
+.dval .v.masked{letter-spacing:.12em;font-size:16px}
+.dval .v.none{color:var(--muted);font-family:var(--sans)}
+.dval.pw{border-color:var(--accent)}
+.notes{margin:0;padding:12px;background:var(--bg);border-radius:8px;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.d-actions{margin-top:auto;display:flex;gap:8px}
+.d-actions .btn:first-child{flex:1}
+.d-empty{margin:auto;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center;max-width:240px}
+.d-empty p{margin:0}
+.d-close{display:none}
+
+.overlay{position:fixed;inset:0;background:rgba(20,20,20,.45);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;overflow:auto;z-index:20}
+.dialog{width:100%;max-width:640px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.dialog.sm{max-width:460px}
+.dlg-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--line2)}
+.dlg-head h2{margin:0;font-size:20px}
+.dlg-body{padding:20px 24px;display:flex;flex-direction:column;gap:18px}
+.dlg-foot{display:flex;align-items:center;gap:10px;padding:16px 24px 20px;border-top:1px solid var(--line2);flex-wrap:wrap}
+.dlg-foot .end{margin-left:auto;display:flex;gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.match{margin:0;padding:14px 16px;border:0;background:var(--accent-soft);border-radius:10px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.match legend{float:left;width:100%;padding:0;margin-bottom:10px;display:flex;gap:8px;align-items:center;font-weight:600;color:var(--accent-soft-ink)}
+.match .grid2{gap:8px}
+.radio{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;background:var(--surface);border:1px solid var(--field);border-radius:8px;cursor:pointer}
+.radio.on{border:2px solid var(--accent);padding:0 11px;font-weight:600}
+.radio input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+.meter{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.segs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:160px}
+.segs i{height:6px;border-radius:3px;background:var(--line)}
+.reuse{color:var(--warn-ink);font-weight:600}
+.tagbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:44px;padding:6px 8px;border:1px solid var(--field);border-radius:8px;background:var(--surface);cursor:text}
+.tagbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tagbox input{flex:1;min-width:100px;border:0;outline:0;background:transparent;height:30px}
+.chip .x{width:22px;height:22px;border:0;background:transparent;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink2);margin-right:-4px;padding:0}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--toast-bg);color:var(--toast-ink);border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:opacity .18s,transform .18s;z-index:40;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast .cd{font-family:var(--mono);font-size:12px;opacity:.75}
+
+.only-narrow{display:none !important}
+@media (max-width:1100px){
+  .shell{grid-template-columns:220px minmax(0,1fr)}
+  .detail{position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);z-index:10;box-shadow:var(--shadow);transform:translateX(105%);transition:transform .2s}
+  .detail.open{transform:none}
+  .d-close{display:inline-flex}
+}
+@media (max-width:760px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .row-user{display:none}
+  .only-narrow{display:inline-flex !important}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  .topbar .btn .lbl{display:none}
+}
+.dialog.wide{max-width:1040px}
+select{font:inherit;color:inherit}
+.select{height:38px;width:100%;border:1px solid var(--field);border-radius:8px;background:var(--surface);padding:0 8px;font-weight:600;font-size:13px}
+.select.set{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.steps{margin:0;padding:0;list-style:none;display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap}
+.steps li{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.steps .dot{width:24px;height:24px;border-radius:999px;border:1px solid var(--field);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
+.steps li.done .dot{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.steps li.cur{color:var(--ink);font-weight:600}
+.steps li.cur .dot{background:var(--accent);color:var(--on-accent);border-color:transparent}
+.steps .bar{width:24px;height:1px;background:var(--field)}
+.drop{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:212px;padding:20px;border:2px dashed var(--field);border-radius:12px;text-align:center;color:var(--muted);cursor:pointer}
+.drop:hover,.drop.over,.drop:focus-within{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-soft-ink)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.drop strong{color:var(--ink)}
+.imp-status{margin:0;display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.imp-status.bad{color:var(--danger)}
+.imp-wrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:20px;align-items:start}
+.imp-opts{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.imp-table{border:1px solid var(--line);border-radius:12px;overflow:auto;max-height:430px;background:var(--surface)}
+.imp-grid{display:grid;min-width:100%}
+.imp-head{padding:12px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);position:sticky;top:0;min-width:0}
+.imp-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.imp-cell{padding:0 12px;line-height:40px;border-bottom:1px solid var(--line2);font-family:var(--mono);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imp-cell.off{color:var(--muted);opacity:.6}
+.imp-more{grid-column:1/-1;padding:12px;font-size:13px;color:var(--muted)}
+.stats{display:flex;flex-direction:column;gap:12px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.stats h3{margin:0;font-size:15px}
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px}
+.stat b{font-size:20px}
+.stat.warn{color:var(--warn-ink)}
+.imp-list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.imp-li{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--line2);min-width:0}
+.imp-li:first-child{border-top:0}
+.imp-li .row-txt{min-width:0}
+@media (max-width:860px){.imp-wrap{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="application/json" id="vault-data">null</script>
+<script>
+(() => {
+'use strict';
+
+/* ================================================================
+   Local Hostage · a password manager in a single HTML file
+   Everything stays local. The CSP above blocks every network request.
+   ================================================================ */
+
+// A copy of the file as it was loaded, taken before we touch the DOM.
+// Every save builds the new file from it.
+const TEMPLATE = '<!doctype html>\n' + document.documentElement.outerHTML;
+
+const VERSION = '0.3.1';
+const KDF_ITER = 600000;              // PBKDF2-SHA256, OWASP recommendation
+const AUTO_LOCK_MS = 5 * 60 * 1000;
+const CLIP_CLEAR_MS = 20 * 1000;
+const MIN_MASTER = 10;
+const NONE = '\u0000none';
+const enc = new TextEncoder();
+const dec = new TextDecoder();
+// Bound to every ciphertext. Kept from the project's first name (Kleidi):
+// changing it would make every existing vault impossible to open.
+const AAD = enc.encode('kleidi-vault-v1');
+const FORMAT = 'local-hostage';
+const FORMATS_READ = [FORMAT, 'kleidi']; // 'kleidi' = vaults saved before the rename
+
+/* ---------------- Crypto ---------------- */
+
+const b64 = (u8) => { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+async function deriveKey(password, salt, iter) {
+  const base = await crypto.subtle.importKey('raw', enc.encode(password.normalize('NFC')), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: iter, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptData(key, salt, iter, obj) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: AAD }, key, enc.encode(JSON.stringify(obj))));
+  return { format: FORMAT, v: 1, kdf: { name: 'PBKDF2-SHA256', iter }, salt: b64(salt), iv: b64(iv), ct: b64(ct) };
+}
+
+async function decryptData(key, p) {
+  const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: unb64(p.iv), additionalData: AAD }, key, unb64(p.ct));
+  return JSON.parse(dec.decode(pt));
+}
+
+function uid() { return b64(crypto.getRandomValues(new Uint8Array(12))).replace(/[+/=]/g, (c) => ({ '+': '-', '/': '_', '=': '' }[c])); }
+
+/* ---------------- State ---------------- */
+
+function readPayload() {
+  try {
+    const p = JSON.parse(document.getElementById('vault-data').textContent.trim());
+    return p && FORMATS_READ.includes(p.format) ? p : null;
+  } catch { return null; }
+}
+
+const S = {
+  payload: readPayload(),   // always the current encrypted form
+  key: null, salt: null, iter: KDF_ITER,
+  data: null,               // decrypted data, only while unlocked
+  dirty: false, isNew: false, saving: false,
+  fileHandle: null, lastSaved: null,
+  fileName: (() => { try { return decodeURIComponent(location.pathname.split('/').pop()) || 'vault.html'; } catch { return 'vault.html'; } })(),
+  lockAt: 0, dialog: null,
+  view: null,
+};
+function freshView() { return { filter: { type: 'all' }, q: '', selId: null, acc: {}, reveal: false }; }
+S.view = freshView();
+const UI = {};
+
+/* ---------------- DOM helpers ---------------- */
+
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'style') el.style.cssText = v;
+    else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'value' || k === 'checked' || k === 'disabled' || k === 'hidden') el[k] = v;
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(Infinity)) { if (c == null || c === false || c === '') continue; el.append(c); }
+  return el;
+}
+
+const ICONS = {
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  unlock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff: '<path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.2M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+  ext: '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
+  star: '<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2l1.1-6.2L3 9.6l6.2-.9z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  refresh: '<path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  alert: '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>',
+  check: '<path d="M5 12l5 5L20 7"/>',
+  save: '<path d="M5 3h11l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M8 3v5h7M8 21v-7h8v7"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+  sheet: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 9h16M4 15h16M10 3v18"/>',
+};
+function icon(name, size = 16, filled = false) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const a = { width: size, height: size, viewBox: '0 0 24 24', fill: filled ? 'currentColor' : 'none', stroke: 'currentColor', 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'i' };
+  for (const k in a) s.setAttribute(k, a[k]);
+  s.innerHTML = ICONS[name]; // constant markup, never user data
+  return s;
+}
+const clean = (kids) => kids.flat(Infinity).filter((c) => c != null && c !== false && c !== '');
+const fill = (el, ...kids) => { el.replaceChildren(...clean(kids)); return el; };
+const add = (el, ...kids) => { el.append(...clean(kids)); return el; };
+const kbd = (t) => h('span', { class: 'kbd' }, t);
+const isTyping = (t) => t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+
+/* ---------------- URLs and domains ---------------- */
+
+const SLD = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac', 'gv', 'or', 'ne', 'mil', 'sch', 'nic']);
+const isIP = (host) => /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || host.includes(':');
+function domainOf(host) {
+  if (isIP(host) || !host.includes('.')) return host;
+  const p = host.split('.');
+  if (p.length >= 3 && p[p.length - 1].length === 2 && SLD.has(p[p.length - 2])) return p.slice(-3).join('.');
+  return p.slice(-2).join('.');
+}
+function parseUrl(raw) {
+  raw = (raw || '').trim();
+  if (!raw || /\s/.test(raw)) return null;
+  const s = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : 'https://' + raw;
+  let u; try { u = new URL(s); } catch { return null; }
+  if (!/^https?:$/.test(u.protocol) || !u.hostname) return null;
+  const host = u.hostname.toLowerCase().replace(/^www\./, '');
+  const domain = domainOf(host);
+  const sub = host !== domain && host.endsWith('.' + domain) ? host.slice(0, -domain.length) : '';
+  const path = (u.pathname === '/' ? '' : u.pathname) + u.search;
+  return { href: u.href, host, domain, sub, display: host + path };
+}
+const pcache = new Map();
+function meta(e) {
+  const u = e.url || '';
+  if (!pcache.has(u)) {
+    const p = parseUrl(u);
+    const ok = !!p && !isIP(p.host) && p.host.includes('.');
+    pcache.set(u, { p, host: p ? p.host : '', group: ok ? p.domain : NONE, sub: ok ? p.sub : '' });
+  }
+  return pcache.get(u);
+}
+function guessName(p) {
+  if (!p) return '';
+  const lab = (p.sub ? p.sub : p.domain).split('.')[0];
+  if (!lab) return '';
+  return lab.length <= 4 ? lab.toUpperCase() : lab[0].toUpperCase() + lab.slice(1);
+}
+
+/* ---------------- Small helpers ---------------- */
+
+const TILE_COLORS = ['#1F4FB8', '#8A3B12', '#3D5A2A', '#5B3F8C', '#7A5A0E', '#0F6B5C', '#3F4246', '#9B2C4A'];
+function tileColor(s) { let x = 0; for (const c of s || '') x = (x * 31 + c.codePointAt(0)) >>> 0; return TILE_COLORS[x % TILE_COLORS.length]; }
+const initial = (s) => ([...(s || '?').trim()][0] || '?').toUpperCase();
+const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const accLabel = (a, i) => a.label || a.username || `Account ${i + 1}`;
+const accOf = (e) => e.accounts.find((x) => x.id === S.view.acc[e.id]) || e.accounts[0];
+const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+function ago(ts) {
+  if (!ts) return '';
+  const d = Math.floor((Date.now() - ts) / 86400000);
+  return d <= 0 ? 'today' : d === 1 ? 'yesterday' : `${d} days ago`;
+}
+const hhmm = (d) => d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+function allTags() { const s = new Set(); for (const e of S.data.entries) for (const t of e.tags || []) s.add(t); return [...s].sort((a, b) => a.localeCompare(b)); }
+
+const GEN_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+function genPassword() {
+  const n = GEN_CHARS.length, lim = 256 - (256 % n), out = [];
+  while (out.length < 20) for (const x of crypto.getRandomValues(new Uint8Array(32))) if (x < lim && out.length < 20) out.push(GEN_CHARS[x % n]);
+  return out.join('').match(/.{5}/g).join('-');
+}
+function strength(pw) {
+  if (!pw) return 0;
+  let pool = 0;
+  if (/[a-z]/.test(pw)) pool += 26;
+  if (/[A-Z]/.test(pw)) pool += 26;
+  if (/\d/.test(pw)) pool += 10;
+  if (/[^A-Za-z0-9]/.test(pw)) pool += 33;
+  const bits = [...pw].length * Math.log2(Math.max(pool, 2));
+  return bits < 40 ? 1 : bits < 60 ? 2 : bits < 80 ? 3 : 4;
+}
+function reuseOf(pw, exceptAccId) {
+  const out = [];
+  if (!pw) return out;
+  for (const e of S.data.entries) e.accounts.forEach((a, i) => { if (a.password === pw && a.id !== exceptAccId) out.push(e.accounts.length > 1 ? `${e.name} (${accLabel(a, i)})` : e.name); });
+  return out;
+}
+
+/* ---------------- Toast and clipboard ---------------- */
+
+const toastEl = h('div', { class: 'toast', role: 'status', 'aria-live': 'polite' });
+let toastT, toastI;
+function toast(msg, ms = 2600, clearIn = 0) {
+  clearTimeout(toastT); clearInterval(toastI);
+  const cd = h('span', { class: 'cd' });
+  fill(toastEl, icon('check', 16), h('span', null, msg), clearIn ? cd : null);
+  if (clearIn) {
+    const end = Date.now() + clearIn;
+    const f = () => { cd.textContent = `clears in ${Math.max(0, Math.ceil((end - Date.now()) / 1000))}s`; };
+    f(); toastI = setInterval(f, 1000);
+  }
+  toastEl.classList.add('show');
+  toastT = setTimeout(() => { toastEl.classList.remove('show'); clearInterval(toastI); }, ms);
+}
+
+let clipT = null;
+function fallbackCopy(t) {
+  const ta = h('textarea', { style: 'position:fixed;top:-200px;opacity:0' });
+  ta.value = t; document.body.append(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch {}
+  ta.remove(); return ok;
+}
+async function clearClip() {
+  clipT = null;
+  try { await navigator.clipboard.writeText(''); }
+  catch { if (!fallbackCopy(' ')) window.addEventListener('focus', clearClip, { once: true }); }
+}
+async function copyText(text, what) {
+  if (!text) { toast(`${what} is empty`); return; }
+  let ok = true;
+  try { await navigator.clipboard.writeText(text); } catch { ok = fallbackCopy(text); }
+  if (!ok) { toast('Copy failed'); return; }
+  clearTimeout(clipT); clipT = setTimeout(clearClip, CLIP_CLEAR_MS);
+  toast(`${what} copied`, 4000, CLIP_CLEAR_MS);
+}
+
+/* ---------------- Saving the file ---------------- */
+
+function buildFile() {
+  const json = JSON.stringify(S.payload).replace(/</g, '\\u003c');
+  return TEMPLATE.replace(/(<script[^>]*id="vault-data"[^>]*>)[\s\S]*?(<\/script>)/, (_, a, b) => a + json + b);
+}
+
+let saveChain = Promise.resolve();
+function save(forceNew = false, silent = false) {
+  saveChain = saveChain.then(() => doSave(forceNew, silent)).catch(() => {});
+  return saveChain;
+}
+async function doSave(forceNew, silent) {
+  if (!S.payload) return;
+  const blob = new Blob([buildFile()], { type: 'text/html' });
+  const suggested = S.isNew ? 'my-vault.html' : S.fileName;
+  if (window.showSaveFilePicker) {
+    try {
+      if (!S.fileHandle || forceNew) {
+        S.fileHandle = await window.showSaveFilePicker({ suggestedName: suggested, types: [{ description: 'Local Hostage vault', accept: { 'text/html': ['.html'] } }] });
+        S.fileName = S.fileHandle.name || S.fileName;
+      }
+      S.saving = true; refreshFoot();
+      const w = await S.fileHandle.createWritable();
+      await w.write(blob); await w.close();
+      afterSave(silent ? null : 'Saved to file');
+      return;
+    } catch (e) {
+      S.saving = false; refreshFoot();
+      if (e && e.name === 'AbortError') return;
+      S.fileHandle = null;
+    }
+  }
+  const a = h('a', { href: URL.createObjectURL(blob), download: suggested });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  afterSave('Downloaded a new copy. Replace your old file with it.');
+}
+function afterSave(msg) {
+  S.dirty = false; S.isNew = false; S.saving = false; S.lastSaved = new Date();
+  if (S.data) { renderBanner(); refreshFoot(); } else renderLock();
+  if (msg) toast(msg, 3200);
+}
+let autoT;
+function scheduleAutosave() {
+  if (!S.fileHandle) return;
+  clearTimeout(autoT);
+  autoT = setTimeout(() => save(false, true), 700);
+}
+
+async function commit() {
+  S.data.updated = Date.now();
+  S.payload = await encryptData(S.key, S.salt, S.iter, S.data);
+  S.dirty = true;
+  scheduleAutosave();
+  update();
+}
+
+/* ---------------- Lock / unlock ---------------- */
+
+function bump() { if (S.data) S.lockAt = Date.now() + AUTO_LOCK_MS; }
+
+function lock(reason) {
+  closeDialog();
+  if (clipT) { clearTimeout(clipT); clearClip(); }
+  S.key = null; S.data = null; S.view = freshView();
+  pcache.clear();
+  renderLock(reason);
+}
+
+function renderLock(reason) {
+  UI.shell = null;
+  const creating = !S.payload;
+  const pw = h('input', { id: 'mp', type: 'password', autocomplete: creating ? 'new-password' : 'current-password', spellcheck: 'false', class: 'mono' });
+  const pw2 = creating ? h('input', { class: 'input mono', id: 'mp2', type: 'password', autocomplete: 'new-password' }) : null;
+  const ack = creating ? h('input', { type: 'checkbox', id: 'ack' }) : null;
+  const err = h('p', { class: 'err', role: 'alert' });
+  const eye = h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Show password', onclick: () => { pw.type = pw.type === 'password' ? 'text' : 'password'; eye.replaceChildren(icon(pw.type === 'password' ? 'eye' : 'eyeOff', 18)); } }, icon('eye', 18));
+  const btnLabel = creating ? 'Create vault' : 'Unlock';
+  const btn = h('button', { class: 'btn primary lg', type: 'submit' }, icon(creating ? 'key' : 'unlock', 18), btnLabel);
+
+  async function onSubmit(ev) {
+    ev.preventDefault();
+    err.textContent = '';
+    const v = pw.value;
+    if (creating) {
+      if ([...v].length < MIN_MASTER) { err.textContent = `The master password needs at least ${MIN_MASTER} characters.`; pw.focus(); return; }
+      if (v !== pw2.value) { err.textContent = 'The two passwords do not match.'; pw2.focus(); return; }
+      if (!ack.checked) { err.textContent = 'Tick the box to confirm you understand. It matters.'; ack.focus(); return; }
+    }
+    btn.disabled = true; btn.replaceChildren(creating ? 'Creating…' : 'Unlocking…');
+    try {
+      if (creating) {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        S.key = await deriveKey(v, salt, KDF_ITER); S.salt = salt; S.iter = KDF_ITER;
+        S.data = { version: 1, created: Date.now(), entries: [] };
+        S.payload = await encryptData(S.key, S.salt, S.iter, S.data);
+        S.dirty = true; S.isNew = true;
+      } else {
+        const salt = unb64(S.payload.salt), iter = Number(S.payload.kdf && S.payload.kdf.iter) || KDF_ITER;
+        const key = await deriveKey(v, salt, iter);
+        const data = await decryptData(key, S.payload);
+        S.key = key; S.salt = salt; S.iter = iter; S.data = data;
+        if (!Array.isArray(S.data.entries)) S.data.entries = [];
+      }
+    } catch {
+      btn.disabled = false; btn.replaceChildren(icon('unlock', 18), btnLabel);
+      err.textContent = 'Wrong master password.';
+      pw.select(); return;
+    }
+    pw.value = ''; if (pw2) pw2.value = '';
+    bump();
+    renderMain();
+  }
+
+  const fields = [
+    h('div', { class: 'field' },
+      h('label', { for: 'mp' }, 'Master password'),
+      h('div', { class: 'input-wrap big' }, pw, eye),
+      creating ? h('span', { class: 'hint' }, `At least ${MIN_MASTER} characters. A phrase of 4 random words is ideal.`) : null),
+    creating ? h('div', { class: 'field' }, h('label', { for: 'mp2' }, 'Confirm master password'), pw2) : null,
+    creating ? h('label', { class: 'check' }, ack, h('span', null, 'I understand that if I forget the master password, my data cannot be recovered in any way.')) : null,
+    err, btn,
+  ];
+
+  const dirtyNote = S.dirty && S.payload && !creating ? h('div', { class: 'note warn' }, icon('alert', 18),
+    h('span', { style: 'flex:1' }, 'There are changes that have not been written to the file yet.'),
+    h('button', { class: 'btn', type: 'button', onclick: () => save() }, 'Save')) : null;
+
+  const card = h('form', { class: 'lock-card', onsubmit: onSubmit, novalidate: true },
+    h('div', { class: 'brand' }, h('div', { class: 'logo' }, icon('key', 20)), h('div', null, h('b', null, 'Local Hostage'), h('small', null, S.fileName))),
+    h('div', { style: 'display:flex;flex-direction:column;gap:10px' },
+      h('h1', null, creating ? 'New vault' : 'Welcome back.'),
+      h('p', { class: 'lead' }, creating ? 'Choose a master password. It is the only one you will need to remember.' : 'Enter your master password to open the vault.')),
+    reason === 'auto' ? h('p', { class: 'hint', style: 'margin:0' }, 'Locked automatically after 5 minutes of inactivity.') : null,
+    dirtyNote,
+    ...fields,
+    h('div', { class: 'note' }, icon('shield', 18), h('span', null, 'Nothing leaves this computer. No network, no cloud, no account. Everything is encrypted inside this file.')));
+
+  fill(UI.app, h('div', { class: 'lock' }, card));
+  pw.focus();
+}
+
+/* ---------------- Main screen ---------------- */
+
+function renderMain() {
+  UI.search = h('input', { type: 'search', id: 'q', placeholder: 'Platform, URL, username, note…', autocomplete: 'off', spellcheck: 'false', 'aria-label': 'Search',
+    oninput: (e) => { S.view.q = e.target.value; renderList(); },
+    onkeydown: (e) => { if (e.key === 'Escape' && e.target.value) { e.stopPropagation(); e.target.value = ''; S.view.q = ''; renderList(); } } });
+  UI.side = h('nav', { class: 'side', 'aria-label': 'Groups' });
+  UI.banner = h('div', { class: 'banner' });
+  UI.list = h('div', { class: 'list' });
+  UI.foot = h('footer', { class: 'foot' });
+  UI.detail = h('aside', { class: 'detail', 'aria-label': 'Entry details' });
+  UI.shell = h('div', { class: 'shell' },
+    UI.side,
+    h('main', { class: 'main' },
+      h('div', { class: 'topbar' },
+        h('div', { class: 'search' }, icon('search', 18), UI.search, kbd('Ctrl K')),
+        h('button', { class: 'btn primary md', type: 'button', onclick: () => openEntryDialog('new') }, icon('plus', 16), h('span', { class: 'lbl' }, 'New entry')),
+        h('button', { class: 'icon-btn boxed only-narrow', type: 'button', 'aria-label': 'Lock now', onclick: () => lock() }, icon('lock', 16))),
+      UI.banner, UI.list, UI.foot),
+    UI.detail);
+  UI.app.replaceChildren(UI.shell);
+  update();
+  UI.search.focus();
+}
+
+function update() {
+  if (!S.data) return;
+  renderSide(); renderBanner(); renderList(); renderDetail(); refreshFoot();
+}
+
+function sameFilter(a, b) { return a.type === b.type && a.value === b.value; }
+function setFilter(f) { S.view.filter = sameFilter(S.view.filter, f) && f.type !== 'all' ? { type: 'all' } : f; renderSide(); renderList(); }
+
+function renderSide() {
+  const es = S.data.entries;
+  const navItem = (label, count, f, cls = '') => h('button', { type: 'button', class: `nav-item ${cls}${sameFilter(S.view.filter, f) ? ' active' : ''}`, 'aria-pressed': String(sameFilter(S.view.filter, f)), onclick: () => setFilter(f) },
+    h('span', null, label), h('span', { class: 'n' }, String(count)));
+
+  const groups = new Map();
+  for (const e of es) {
+    const m = meta(e);
+    if (!groups.has(m.group)) groups.set(m.group, { n: 0, subs: new Map() });
+    const g = groups.get(m.group); g.n++;
+    if (m.sub) g.subs.set(m.host, (g.subs.get(m.host) || 0) + 1);
+  }
+  const keys = [...groups.keys()].filter((k) => k !== NONE).sort((a, b) => a.localeCompare(b));
+  const domItems = [];
+  for (const k of keys) {
+    const g = groups.get(k);
+    domItems.push(navItem(k, g.n, { type: 'domain', value: k }, 'mono'));
+    if (g.subs.size) for (const [host, n] of [...g.subs].sort()) domItems.push(navItem(host.slice(0, -k.length), n, { type: 'host', value: host }, 'sub'));
+  }
+  if (groups.has(NONE)) domItems.push(navItem('No URL', groups.get(NONE).n, { type: 'domain', value: NONE }));
+
+  const tags = allTags();
+  fill(UI.side, 
+    h('div', { class: 'brand' },
+      h('div', null, h('div', { class: 'logo' }, icon('key', 16)), h('b', null, 'Local Hostage')),
+      h('button', { type: 'button', class: 'icon-btn boxed', 'aria-label': 'Lock now', title: 'Lock now', onclick: () => lock() }, icon('lock', 16))),
+    h('div', { class: 'navgrp' },
+      navItem('All entries', es.length, { type: 'all' }),
+      navItem('Favorites', es.filter((e) => e.favorite).length, { type: 'fav' }),
+      navItem('Recent', Math.min(10, es.length), { type: 'recent' })),
+    domItems.length ? h('div', { class: 'navgrp' }, h('span', { class: 'navhead' }, 'Domains'), domItems) : null,
+    tags.length ? h('div', { class: 'navgrp' }, h('span', { class: 'navhead' }, 'Tags'),
+      h('div', { class: 'tags' }, tags.map((t) => h('button', { type: 'button', class: 'chip' + (sameFilter(S.view.filter, { type: 'tag', value: t }) ? ' on' : ''), onclick: () => setFilter({ type: 'tag', value: t }) }, t)))) : null,
+    h('div', { class: 'side-foot' },
+      h('button', { class: 'btn', type: 'button', onclick: openImport }, icon('upload', 16), 'Import from Excel'),
+      h('button', { class: 'btn', type: 'button', onclick: openMasterDialog }, icon('key', 16), 'Change master password'),
+      h('span', { class: 'hint', style: 'padding:0 6px' }, `Local Hostage v${VERSION} · open source`)));
+}
+
+function renderBanner() {
+  const B = UI.banner;
+  B.replaceChildren();
+  const fs = !!window.showSaveFilePicker;
+  let text = null;
+  if (S.dirty) {
+    if (S.isNew) text = 'New vault: save it to a file so it is not lost.';
+    else if (!S.fileHandle && fs) text = `On the first save, pick this same file (${S.fileName}) to overwrite it. After that it saves on its own.`;
+    else if (!fs) text = 'This browser cannot write to files directly: every save downloads a new copy. Keep only the latest one.';
+  }
+  B.hidden = !text;
+  if (text) B.append(h('div', { class: 'note warn' }, icon('alert', 18), h('span', { style: 'flex:1' }, text),
+    h('button', { class: 'btn', type: 'button', onclick: () => save() }, icon('save', 16), S.isNew ? 'Save as…' : 'Save')));
+}
+
+function visibleEntries() {
+  let list = S.data.entries;
+  const f = S.view.filter;
+  if (f.type === 'fav') list = list.filter((e) => e.favorite);
+  else if (f.type === 'recent') list = [...list].sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, 10);
+  else if (f.type === 'domain') list = list.filter((e) => meta(e).group === f.value);
+  else if (f.type === 'host') list = list.filter((e) => meta(e).host === f.value);
+  else if (f.type === 'tag') list = list.filter((e) => (e.tags || []).includes(f.value));
+  const toks = norm(S.view.q).split(/\s+/).filter(Boolean);
+  if (toks.length) list = list.filter((e) => {
+    const hay = norm([e.name, e.url, ...(e.tags || []), ...e.accounts.flatMap((a) => [a.label, a.username, a.notes])].join(' '));
+    return toks.every((t) => hay.includes(t));
+  });
+  return list;
+}
+
+function renderList() {
+  const L = UI.list;
+  L.replaceChildren();
+  if (!S.data.entries.length) {
+    L.append(h('div', { class: 'empty' }, icon('key', 32), h('h2', null, 'Empty vault'),
+      h('p', null, 'Bring your passwords over from Excel in a minute, or add your first entry with ', kbd('N'), '.'),
+      h('div', { style: 'display:flex;gap:10px;flex-wrap:wrap;justify-content:center' },
+        h('button', { class: 'btn primary md', type: 'button', onclick: openImport }, icon('upload', 16), 'Import from Excel'),
+        h('button', { class: 'btn md', type: 'button', onclick: () => openEntryDialog('new') }, icon('plus', 16), 'New entry'))));
+    return;
+  }
+  const entries = visibleEntries();
+  if (!entries.length) {
+    L.append(h('div', { class: 'empty' }, h('p', null, S.view.q ? `Nothing matches "${S.view.q}".` : 'No entries in this group.')));
+    return;
+  }
+  const groups = new Map();
+  for (const e of entries) { const g = meta(e).group; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(e); }
+  const keys = [...groups.keys()].sort((a, b) => (a === NONE ? 1 : b === NONE ? -1 : a.localeCompare(b)));
+  for (const k of keys) {
+    const es = groups.get(k).sort((a, b) => a.name.localeCompare(b.name));
+    const subs = new Set(es.map((e) => meta(e).host).filter((host, i) => meta(es[i]).sub));
+    L.append(h('section', { class: 'group' },
+      h('div', { class: 'group-head' },
+        k === NONE ? h('span', { class: 'gname' }, 'No URL') : h('span', { class: 'gname mono' }, k),
+        subs.size ? h('span', { class: 'gmeta' }, plural(subs.size, 'subdomain', 'subdomains')) : null),
+      es.map(row)));
+  }
+}
+
+function row(e) {
+  const a = accOf(e), m = meta(e), sel = S.view.selId === e.id;
+  return h('div', { class: 'row' + (sel ? ' sel' : '') },
+    h('button', { type: 'button', class: 'row-main', 'aria-current': sel ? 'true' : null, onclick: () => select(e.id) },
+      h('span', { class: 'tile', style: `background:${tileColor(e.name)}` }, initial(e.name)),
+      h('span', { class: 'row-txt' },
+        h('span', { class: 'row-name' }, h('span', null, e.name), e.accounts.length > 1 ? h('span', { class: 'badge' }, `${e.accounts.length} accounts`) : null),
+        h('span', { class: 'row-url' }, m.p ? m.p.display : (e.url || '·'))),
+      h('span', { class: 'row-user' }, a.username || '')),
+    h('button', { type: 'button', class: 'icon-btn', 'aria-label': `Copy username for ${e.name}`, title: 'Copy username', onclick: () => copyText(a.username, 'Username') }, icon('user', 16)),
+    h('button', { type: 'button', class: 'icon-btn', 'aria-label': `Copy password for ${e.name}`, title: 'Copy password', onclick: () => copyText(a.password, 'Password') }, icon('key', 16)));
+}
+
+function select(id, accId) {
+  S.view.selId = id;
+  if (accId) S.view.acc[id] = accId;
+  S.view.reveal = false;
+  renderList(); renderDetail();
+}
+
+function openUrl(href) { window.open(href, '_blank', 'noopener,noreferrer'); }
+
+function renderDetail() {
+  const D = UI.detail;
+  D.replaceChildren();
+  const e = S.data.entries.find((x) => x.id === S.view.selId);
+  if (!e) {
+    D.classList.remove('open');
+    D.append(h('div', { class: 'd-empty' }, icon('key', 28), h('p', null, 'Pick an entry to see its details.'),
+      h('p', { class: 'hint' }, kbd('Ctrl K'), ' search · ', kbd('N'), ' new entry')));
+    return;
+  }
+  D.classList.add('open');
+  const a = accOf(e), m = meta(e);
+  const pwVal = h('span', { class: 'v' + (S.view.reveal ? '' : ' masked') + (a.password ? '' : ' none') }, a.password ? (S.view.reveal ? a.password : '•'.repeat(14)) : 'empty');
+
+  add(D,
+    h('div', { class: 'd-head' },
+      h('span', { class: 'tile', style: `background:${tileColor(e.name)}` }, initial(e.name)),
+      h('div', { class: 'd-title' },
+        h('h2', null, e.name),
+        m.p ? h('button', { type: 'button', class: 'linkbtn', onclick: () => openUrl(m.p.href), title: 'Open in a new tab' }, m.p.display, icon('ext', 12))
+          : e.url ? h('span', { class: 'd-url' }, e.url) : null),
+      h('button', { type: 'button', class: 'icon-btn star' + (e.favorite ? ' on' : ''), 'aria-label': 'Favorite', 'aria-pressed': String(!!e.favorite), onclick: () => { e.favorite = !e.favorite; commit(); } }, icon('star', 18, !!e.favorite)),
+      h('button', { type: 'button', class: 'icon-btn d-close', 'aria-label': 'Close details', onclick: () => { S.view.selId = null; renderList(); renderDetail(); } }, icon('x', 18))),
+    h('div', { class: 'tabs', role: 'tablist', 'aria-label': 'Accounts' },
+      e.accounts.map((x, i) => h('button', { type: 'button', role: 'tab', class: 'tab', 'aria-selected': String(x === a), title: accLabel(x, i), onclick: () => select(e.id, x.id) }, accLabel(x, i))),
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Add account', title: 'Add account', onclick: () => openEntryDialog('addAcc', e.id) }, icon('plus', 14))),
+    h('div', { class: 'dfield' },
+      h('span', { class: 'dlabel' }, 'Username'),
+      h('div', { class: 'dval' }, h('span', { class: 'v' + (a.username ? '' : ' none') }, a.username || 'empty'),
+        h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Copy username', onclick: () => copyText(a.username, 'Username') }, icon('copy', 16)))),
+    h('div', { class: 'dfield' },
+      h('span', { class: 'dlabel' }, 'Password', a.changed ? h('span', null, `changed ${ago(a.changed)}`) : null),
+      h('div', { class: 'dval pw' }, pwVal,
+        h('button', { type: 'button', class: 'icon-btn', 'aria-label': S.view.reveal ? 'Hide password' : 'Show password', onclick: () => { S.view.reveal = !S.view.reveal; renderDetail(); } }, icon(S.view.reveal ? 'eyeOff' : 'eye', 16)),
+        h('button', { type: 'button', class: 'icon-btn solid', 'aria-label': 'Copy password', onclick: () => copyText(a.password, 'Password') }, icon('copy', 16)))),
+    a.notes ? h('div', { class: 'dfield' }, h('span', { class: 'dlabel' }, 'Notes'), h('p', { class: 'notes' }, a.notes)) : null,
+    (e.tags || []).length ? h('div', { class: 'tags', style: 'padding:0' }, e.tags.map((t) => h('button', { type: 'button', class: 'chip', onclick: () => setFilter({ type: 'tag', value: t }) }, t))) : null,
+    h('div', { class: 'd-actions' },
+      h('button', { type: 'button', class: 'btn', onclick: () => openEntryDialog('edit', e.id, a.id) }, 'Edit'),
+      h('button', { type: 'button', class: 'btn danger', onclick: () => deleteEntry(e) }, 'Delete')));
+}
+
+function deleteEntry(e) {
+  const extra = e.accounts.length > 1 ? ` and its ${e.accounts.length} accounts` : '';
+  if (!confirm(`Delete the entry "${e.name}"${extra}?`)) return;
+  S.data.entries = S.data.entries.filter((x) => x !== e);
+  S.view.selId = null;
+  commit();
+  toast('Entry deleted');
+}
+
+function refreshFoot() {
+  const F = UI.foot;
+  if (!F || !S.data) return;
+  let status;
+  if (S.saving) status = [h('span', null, 'Saving…')];
+  else if (S.dirty) status = [h('span', { class: 'pill-warn' }, 'Unsaved changes'),
+    h('button', { class: 'btn dark', type: 'button', onclick: () => save() }, 'Save', kbd('Ctrl S'))];
+  else if (S.lastSaved) status = [h('span', { class: 'ok' }, icon('check', 14), `Saved ${hhmm(S.lastSaved)}${S.fileHandle ? ' · autosave on' : ''}`)];
+  else status = [h('span', { class: 'mono' }, S.fileName)];
+  UI.lockTxt = h('span');
+  fill(F, h('span', { class: 'sec' }, icon('shield', 14), 'Encrypted locally · AES-256-GCM'), UI.lockTxt, h('div', { class: 'right' }, status));
+  tick();
+}
+
+function tick() {
+  if (!S.data) return;
+  const left = S.lockAt - Date.now();
+  if (left <= 0) { lock('auto'); return; }
+  if (UI.lockTxt) {
+    const s = Math.ceil(left / 1000);
+    UI.lockTxt.textContent = `Locks in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  }
+}
+
+/* ---------------- Dialogs ---------------- */
+
+function openDialog({ title, body, foot, submit, small, wide, focus, onClose }) {
+  closeDialog();
+  const ov = h('div', { class: 'overlay' },
+    h('div', { class: 'dialog' + (small ? ' sm' : '') + (wide ? ' wide' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'dlg-t' },
+      h('div', { class: 'dlg-head' }, h('h2', { id: 'dlg-t' }, title),
+        h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Close', onclick: closeDialog }, icon('x', 18))),
+      body, foot));
+  document.body.append(ov);
+  if (UI.shell) UI.shell.inert = true;
+  S.dialog = { el: ov, submit, onClose };
+  (focus || ov.querySelector('input:not([disabled]),textarea,button')).focus();
+}
+function closeDialog() {
+  if (!S.dialog) return;
+  const d = S.dialog;
+  d.el.remove(); S.dialog = null;
+  if (d.onClose) d.onClose();
+  if (UI.shell) UI.shell.inert = false;
+}
+
+function openEntryDialog(mode, entryId, accId) {
+  const entry = entryId ? S.data.entries.find((x) => x.id === entryId) : null;
+  if (mode !== 'new' && !entry) return;
+  const acc = mode === 'edit' ? (entry.accounts.find((x) => x.id === accId) || entry.accounts[0]) : null;
+  let match = mode === 'addAcc' ? entry : null;
+  let attach = mode === 'addAcc';
+  let lastMatchId = match ? match.id : null;
+  let nameTouched = mode !== 'new';
+  let tags = entry ? [...(entry.tags || [])] : [];
+
+  const urlIn = h('input', { class: 'input mono', id: 'f-url', type: 'text', inputmode: 'url', autocomplete: 'off', spellcheck: 'false', placeholder: 'https://crm.example.com/login', value: entry ? entry.url || '' : '', disabled: mode === 'addAcc' });
+  const urlHint = h('span', { class: 'hint' });
+  const nameIn = h('input', { class: 'input', id: 'f-name', type: 'text', autocomplete: 'off', placeholder: 'e.g. CRM', value: entry ? entry.name : '', disabled: mode === 'addAcc', oninput: () => { nameTouched = true; } });
+  const labelIn = h('input', { class: 'input', id: 'f-label', type: 'text', autocomplete: 'off', placeholder: 'e.g. Admin', value: acc ? acc.label || '' : '' });
+  const userIn = h('input', { class: 'input mono', id: 'f-user', type: 'text', autocomplete: 'off', spellcheck: 'false', value: acc ? acc.username || '' : '' });
+  const pwIn = h('input', { id: 'f-pw', type: 'password', class: 'mono', autocomplete: 'new-password', spellcheck: 'false', value: acc ? acc.password || '' : '' });
+  const notesIn = h('textarea', { class: 'input', id: 'f-notes', rows: 3 });
+  notesIn.value = acc ? acc.notes || '' : '';
+  const matchBox = h('div');
+  const segs = h('div', { class: 'segs', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i'));
+  const meterTxt = h('span');
+  const err = h('p', { class: 'err', role: 'alert' });
+  const tagInput = h('input', { type: 'text', id: 'f-tags', placeholder: tags.length ? '' : 'Add…', list: 'tag-list', autocomplete: 'off' });
+  const tagBox = h('div', { class: 'tagbox', onclick: () => tagInput.focus() });
+  const eye = h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Show password', onclick: () => { pwIn.type = pwIn.type === 'password' ? 'text' : 'password'; eye.replaceChildren(icon(pwIn.type === 'password' ? 'eye' : 'eyeOff', 16)); } }, icon('eye', 16));
+  const gen = h('button', { type: 'button', class: 'btn md', onclick: () => { pwIn.value = genPassword(); pwIn.type = 'text'; eye.replaceChildren(icon('eyeOff', 16)); onPw(); } }, icon('refresh', 16), 'Generate');
+
+  function renderTags() {
+    tagBox.replaceChildren(...tags.map((t) => h('span', { class: 'chip' }, t,
+      h('button', { type: 'button', class: 'x', 'aria-label': `Remove ${t}`, onclick: (ev) => { ev.stopPropagation(); tags = tags.filter((x) => x !== t); renderTags(); tagInput.focus(); } }, icon('x', 12)))), tagInput);
+    tagInput.placeholder = tags.length ? '' : 'Add…';
+  }
+  function addTag(v) {
+    v = v.replace(/,/g, '').trim();
+    if (v && !tags.includes(v)) tags.push(v);
+    tagInput.value = ''; renderTags(); tagInput.focus();
+  }
+  tagInput.addEventListener('keydown', (ev) => {
+    if ((ev.key === 'Enter' && !ev.ctrlKey && !ev.metaKey) || ev.key === ',') { ev.preventDefault(); if (tagInput.value.trim()) addTag(tagInput.value); }
+    else if (ev.key === 'Backspace' && !tagInput.value && tags.length) { tags.pop(); renderTags(); tagInput.focus(); }
+  });
+
+  function applyAttach() {
+    if (attach && match) { nameIn.disabled = true; nameIn.value = match.name; tags = [...(match.tags || [])]; }
+    else if (mode === 'new') { nameIn.disabled = false; if (!nameTouched) nameIn.value = guessName(parseUrl(urlIn.value)); }
+    renderTags();
+  }
+  function renderMatch() {
+    matchBox.replaceChildren();
+    if (!match) return;
+    const n = match.accounts.length;
+    const radio = (val, text) => {
+      const inp = h('input', { type: 'radio', name: 'f-mode', checked: attach === val, onchange: () => { attach = val; renderMatch(); applyAttach(); } });
+      return h('label', { class: 'radio' + (attach === val ? ' on' : '') }, inp, text);
+    };
+    const labels = match.accounts.map(accLabel).join(', ');
+    matchBox.append(h('fieldset', { class: 'match' },
+      h('legend', null, icon('info', 16), `"${match.name}" already exists${n > 1 ? ` with ${n} accounts (${labels})` : ` (${labels})`}`),
+      h('div', { class: 'grid2' }, radio(true, `Add as ${ordinal(n + 1)} account`), radio(false, 'Separate entry'))));
+  }
+  function onUrl() {
+    const raw = urlIn.value.trim();
+    const p = parseUrl(raw);
+    const ok = !!p && !isIP(p.host) && p.host.includes('.');
+    fill(urlHint, ...(ok
+      ? ['Group: ', h('span', { class: 'mono' }, p.domain), p.sub ? [' · subdomain ', h('span', { class: 'mono' }, p.sub)] : null]
+      : [raw ? 'Does not look like a web address. It will go in the "No URL" group.' : 'Optional. For VPN, Wi‑Fi or desktop apps, write whatever helps, e.g. an IP.']));
+    if (mode !== 'new') return;
+    const host = p ? p.host : '';
+    match = host ? S.data.entries.find((x) => meta(x).host === host) || null : null;
+    if ((match ? match.id : null) !== lastMatchId) { attach = !!match; lastMatchId = match ? match.id : null; }
+    renderMatch(); applyAttach();
+  }
+  function onPw() {
+    const s = strength(pwIn.value);
+    const cols = ['', 'var(--danger)', 'var(--warn-ink)', 'var(--accent)', 'var(--accent)'];
+    [...segs.children].forEach((el, i) => { el.style.background = i < s ? cols[s] : ''; });
+    meterTxt.replaceChildren();
+    if (!pwIn.value) { meterTxt.append('Type or generate a password'); return; }
+    const used = reuseOf(pwIn.value, acc && acc.id);
+    meterTxt.append(h('strong', null, ['', 'Weak', 'Fair', 'Good', 'Strong'][s]), ` · ${[...pwIn.value].length} characters · `,
+      used.length ? h('span', { class: 'reuse' }, `same as: ${used.slice(0, 2).join(', ')}${used.length > 2 ? '…' : ''}`) : 'not used anywhere else');
+  }
+  urlIn.addEventListener('input', onUrl);
+  pwIn.addEventListener('input', onPw);
+
+  async function submit() {
+    err.textContent = '';
+    if (tagInput.value.trim()) addTag(tagInput.value);
+    const name = nameIn.value.trim(), url = urlIn.value.trim(), label = labelIn.value.trim(),
+      username = userIn.value.trim(), password = pwIn.value, notes = notesIn.value.trim();
+    if (!(attach && match) && !name) { err.textContent = 'Enter a platform name.'; nameIn.focus(); return; }
+    if (!username && !password) { err.textContent = 'Fill in at least a username or a password.'; userIn.focus(); return; }
+    const now = Date.now();
+    let target, targetAcc;
+    if (mode === 'edit') {
+      target = entry;
+      target.name = name; target.url = url; target.tags = tags;
+      targetAcc = acc;
+      if (acc.password !== password) acc.changed = now;
+      Object.assign(acc, { label, username, password, notes });
+    } else {
+      targetAcc = { id: uid(), label, username, password, notes, changed: now };
+      if (attach && match) { target = match; target.accounts.push(targetAcc); target.tags = tags; }
+      else { target = { id: uid(), name, url, tags, favorite: false, created: now, accounts: [targetAcc] }; S.data.entries.push(target); }
+    }
+    target.updated = now;
+    closeDialog();
+    S.view.selId = target.id; S.view.acc[target.id] = targetAcc.id; S.view.reveal = false;
+    await commit();
+    toast(mode === 'edit' ? 'Entry updated' : attach && match ? 'Account added' : 'Entry added');
+  }
+
+  function deleteAccount() {
+    const i = entry.accounts.indexOf(acc);
+    if (!confirm(`Delete the account "${accLabel(acc, i)}" from "${entry.name}"?`)) return;
+    entry.accounts.splice(i, 1); entry.updated = Date.now();
+    delete S.view.acc[entry.id];
+    closeDialog(); commit(); toast('Account deleted');
+  }
+
+  const body = h('div', { class: 'dlg-body' },
+    h('div', { class: 'field' }, h('label', { for: 'f-url' }, 'Address (URL)'), urlIn, urlHint),
+    matchBox,
+    h('div', { class: 'grid2' },
+      h('div', { class: 'field' }, h('label', { for: 'f-name' }, 'Platform'), nameIn),
+      h('div', { class: 'field' }, h('label', { for: 'f-label' }, 'Account name'), labelIn, h('span', { class: 'hint' }, 'Shown as a tab on the entry'))),
+    h('div', { class: 'field' }, h('label', { for: 'f-user' }, 'Username'), userIn),
+    h('div', { class: 'field' }, h('label', { for: 'f-pw' }, 'Password'),
+      h('div', { style: 'display:flex;gap:8px' }, h('div', { class: 'input-wrap', style: 'flex:1;min-width:0' }, pwIn, eye), gen),
+      h('div', { class: 'meter' }, segs, meterTxt)),
+    h('div', { class: 'field' }, h('label', { for: 'f-notes' }, 'Notes ', h('span', { class: 'hint' }, '(for this account)')), notesIn),
+    h('div', { class: 'field' }, h('label', { for: 'f-tags' }, 'Tags'), tagBox),
+    h('datalist', { id: 'tag-list' }, allTags().map((t) => h('option', { value: t }))),
+    err);
+
+  const foot = h('div', { class: 'dlg-foot' },
+    mode === 'edit' && entry.accounts.length > 1
+      ? h('button', { type: 'button', class: 'btn danger', onclick: deleteAccount }, 'Delete account')
+      : h('span', { class: 'hint' }, kbd('Esc'), ' cancel'),
+    h('div', { class: 'end' },
+      h('button', { type: 'button', class: 'btn md', onclick: closeDialog }, 'Cancel'),
+      h('button', { type: 'button', class: 'btn primary md', onclick: submit }, 'Save', kbd('Ctrl ↵'))));
+
+  const titles = { new: 'New entry', edit: `Edit: ${entry ? entry.name : ''}`, addAcc: `New account: ${entry ? entry.name : ''}` };
+  openDialog({ title: titles[mode], body, foot, submit, focus: mode === 'addAcc' ? labelIn : urlIn });
+  onUrl(); onPw(); renderTags();
+}
+
+function openMasterDialog() {
+  const cur = h('input', { class: 'input mono', type: 'password', id: 'm-cur', autocomplete: 'current-password' });
+  const n1 = h('input', { class: 'input mono', type: 'password', id: 'm-n1', autocomplete: 'new-password' });
+  const n2 = h('input', { class: 'input mono', type: 'password', id: 'm-n2', autocomplete: 'new-password' });
+  const err = h('p', { class: 'err', role: 'alert' });
+  const btn = h('button', { type: 'button', class: 'btn primary md', onclick: () => submit() }, 'Change password');
+  async function submit() {
+    err.textContent = '';
+    if ([...n1.value].length < MIN_MASTER) { err.textContent = `The new password needs at least ${MIN_MASTER} characters.`; n1.focus(); return; }
+    if (n1.value !== n2.value) { err.textContent = 'The two new passwords do not match.'; n2.focus(); return; }
+    btn.disabled = true; btn.textContent = 'Checking…';
+    try { await decryptData(await deriveKey(cur.value, S.salt, S.iter), S.payload); }
+    catch { err.textContent = 'The current password is wrong.'; btn.disabled = false; btn.textContent = 'Change password'; cur.select(); return; }
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    S.key = await deriveKey(n1.value, salt, KDF_ITER); S.salt = salt; S.iter = KDF_ITER;
+    closeDialog();
+    await commit();
+    toast(S.fileHandle ? 'Master password changed' : 'Master password changed. Save the file.', 4000);
+  }
+  openDialog({
+    title: 'Change master password', small: true, submit,
+    body: h('div', { class: 'dlg-body' },
+      h('div', { class: 'field' }, h('label', { for: 'm-cur' }, 'Current master password'), cur),
+      h('div', { class: 'field' }, h('label', { for: 'm-n1' }, 'New master password'), n1),
+      h('div', { class: 'field' }, h('label', { for: 'm-n2' }, 'Confirm new master password'), n2),
+      h('p', { class: 'hint', style: 'margin:0' }, 'Older copies of the file still open with the old password. Delete them if you do not need them.'),
+      err),
+    foot: h('div', { class: 'dlg-foot' }, h('div', { class: 'end' }, h('button', { type: 'button', class: 'btn md', onclick: closeDialog }, 'Cancel'), btn)),
+  });
+}
+
+/* ---------------- Import: parsers ---------------- */
+
+// Delimited text (pasting from Excel gives TSV, .csv files use , or ;)
+function parseDelimited(text) {
+  text = (text || '').replace(/^﻿/, '');
+  const firstLine = text.split(/\r?\n/, 1)[0] || '';
+  let d = '\t', best = 0;
+  for (const c of ['\t', ';', ',']) {
+    let n = 0, q = false;
+    for (const ch of firstLine) { if (ch === '"') q = !q; else if (ch === c && !q) n++; }
+    if (n > best) { best = n; d = c; }
+  }
+  const rows = []; let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+      else field += c;
+    } else if (c === '"' && field === '') q = true;
+    else if (c === d) { row.push(field); field = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(field); rows.push(row); row = []; field = '';
+    } else field += c;
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// Excel often saves CSV in the system's legacy code page, not UTF-8.
+// Guess that code page from the browser language.
+const LEGACY_CP = { el: 'windows-1253', ru: 'windows-1251', uk: 'windows-1251', bg: 'windows-1251', sr: 'windows-1251', pl: 'windows-1250', cs: 'windows-1250', sk: 'windows-1250', hu: 'windows-1250', ro: 'windows-1250', hr: 'windows-1250', sl: 'windows-1250', tr: 'windows-1254' };
+function decodeText(buf) {
+  try { return new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+  catch {
+    const lang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    try { return new TextDecoder(LEGACY_CP[lang] || 'windows-1252').decode(buf); } catch { return new TextDecoder('windows-1252').decode(buf); }
+  }
+}
+
+// Minimal zip reader built on the browser's native DecompressionStream
+function readZip(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('bad-zip');
+  const count = dv.getUint16(eocd + 10, true);
+  let off = dv.getUint32(eocd + 16, true);
+  const files = new Map();
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(off, true) !== 0x02014b50) throw new Error('bad-zip');
+    const method = dv.getUint16(off + 10, true), csize = dv.getUint32(off + 20, true);
+    const nl = dv.getUint16(off + 28, true), el = dv.getUint16(off + 30, true), cl = dv.getUint16(off + 32, true);
+    const lho = dv.getUint32(off + 42, true);
+    files.set(dec.decode(u8.subarray(off + 46, off + 46 + nl)), { method, csize, lho });
+    off += 46 + nl + el + cl;
+  }
+  return {
+    async text(name) {
+      const f = files.get(name);
+      if (!f) return null;
+      const start = f.lho + 30 + dv.getUint16(f.lho + 26, true) + dv.getUint16(f.lho + 28, true);
+      const data = u8.subarray(start, start + f.csize);
+      if (f.method === 0) return dec.decode(data);
+      if (f.method !== 8) throw new Error('bad-zip');
+      const out = await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
+      return dec.decode(out);
+    },
+  };
+}
+
+async function readXlsx(buf) {
+  const z = readZip(buf);
+  const xml = (s) => (s ? new DOMParser().parseFromString(s, 'application/xml') : null);
+  const tags = (node, name) => [...node.getElementsByTagName(name)];
+  const wb = xml(await z.text('xl/workbook.xml'));
+  if (!wb) throw new Error('not-xlsx');
+  const rels = xml(await z.text('xl/_rels/workbook.xml.rels'));
+  const relMap = new Map(rels ? tags(rels, 'Relationship').map((r) => [r.getAttribute('Id'), r.getAttribute('Target')]) : []);
+  const sheets = tags(wb, 'sheet').map((s, i) => {
+    let t = relMap.get(s.getAttribute('r:id')) || `worksheets/sheet${i + 1}.xml`;
+    t = t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '');
+    return { name: s.getAttribute('name') || `Sheet ${i + 1}`, path: t };
+  });
+  const ssDoc = xml(await z.text('xl/sharedStrings.xml'));
+  const shared = ssDoc ? tags(ssDoc, 'si').map((si) => tags(si, 't').filter((t) => t.parentNode.nodeName !== 'rPh').map((t) => t.textContent).join('')) : [];
+  const colIdx = (ref) => { let n = 0; for (const ch of ref.replace(/\d+/g, '')) n = n * 26 + (ch.charCodeAt(0) - 64); return n - 1; };
+  async function load(i) {
+    const doc = xml(await z.text(sheets[i].path));
+    if (!doc) return [];
+    const rows = [];
+    for (const r of tags(doc, 'row')) {
+      const ri = (Number(r.getAttribute('r')) || rows.length + 1) - 1;
+      const arr = []; let ci = 0;
+      for (const c of tags(r, 'c')) {
+        const ref = c.getAttribute('r'); if (ref) ci = colIdx(ref);
+        const t = c.getAttribute('t'), vEl = c.getElementsByTagName('v')[0];
+        let v = '';
+        if (t === 's') v = vEl ? shared[Number(vEl.textContent)] ?? '' : '';
+        else if (t === 'inlineStr') v = tags(c, 't').map((x) => x.textContent).join('');
+        else if (vEl) v = vEl.textContent;
+        if (t === 'b') v = v === '1' ? 'TRUE' : 'FALSE';
+        arr[ci] = v; ci++;
+      }
+      rows[ri] = arr;
+    }
+    return Array.from(rows, (r) => Array.from(r || [], (x) => x ?? ''));
+  }
+  return { sheets, load };
+}
+
+function tidyRows(rows) {
+  rows = rows.map((r) => r.map((c) => String(c ?? '')));
+  rows = rows.filter((r) => r.some((c) => c.trim()));
+  let w = 0;
+  for (const r of rows) { let n = r.length; while (n && !r[n - 1].trim()) n--; w = Math.max(w, n); }
+  return rows.map((r) => Array.from({ length: w }, (_, i) => r[i] ?? ''));
+}
+
+const FIELDS = [['skip', 'Ignore'], ['name', 'Platform'], ['url', 'URL'], ['username', 'Username'], ['password', 'Password'], ['label', 'Account name'], ['notes', 'Notes'], ['tags', 'Tags']];
+const FIELD_NAME = Object.fromEntries(FIELDS);
+// Header names recognised on import, in English and Greek (accents are stripped before matching)
+const SYN = {
+  password: ['κωδικος', 'κωδ', 'συνθηματικο', 'pass', 'password', 'passwd', 'pwd', 'pin', 'κλειδι'],
+  username: ['χρηστης', 'ονομα χρηστη', 'username', 'user', 'user name', 'login', 'email', 'e-mail', 'mail', 'λογαριασμος', 'account', 'id'],
+  url: ['url', 'link', 'λινκ', 'συνδεσμος', 'διευθυνση', 'website', 'web', 'site', 'domain', 'address', 'ip'],
+  name: ['πλατφορμα', 'συστημα', 'εφαρμογη', 'υπηρεσια', 'ονομα', 'εργαλειο', 'platform', 'system', 'service', 'app', 'application', 'name', 'title', 'tool'],
+  label: ['ρολος', 'τυπος', 'role', 'type', 'label', 'επιπεδο', 'access'],
+  notes: ['σχολια', 'σημειωσεις', 'παρατηρησεις', 'notes', 'note', 'comments', 'comment', 'info', 'πληροφοριες'],
+  tags: ['ετικετες', 'tags', 'tag', 'χωρα', 'country', 'market', 'αγορα', 'κατηγορια', 'category', 'ομαδα', 'group', 'τμημα', 'department'],
+};
+function headerField(cell) {
+  const c = norm(cell).replace(/[_.:#*()]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!c) return null;
+  for (const f of ['password', 'username', 'url', 'name', 'label', 'notes', 'tags']) if (SYN[f].some((s) => c === s)) return f;
+  for (const f of ['password', 'username', 'url', 'notes', 'tags', 'label', 'name']) if (SYN[f].some((s) => s.length > 3 && c.includes(s))) return f;
+  return null;
+}
+function detectHeader(rows) { return rows.length > 1 && rows[0].some((c) => headerField(c)); }
+function guessMap(rows, header) {
+  const w = rows[0] ? rows[0].length : 0;
+  const map = Array(w).fill('skip');
+  const taken = new Set();
+  const multi = new Set(['notes', 'tags']);
+  if (header) rows[0].forEach((c, i) => { const f = headerField(c); if (f && (multi.has(f) || !taken.has(f))) { map[i] = f; taken.add(f); } });
+  const sample = rows.slice(header ? 1 : 0, 40);
+  const ratio = (i, test) => { const vals = sample.map((r) => r[i].trim()).filter(Boolean); return vals.length ? vals.filter(test).length / vals.length : 0; };
+  const looksUrl = (v) => !v.includes('@') && !!parseUrl(v) && (/^https?:\/\//i.test(v) || /^[\w-]+(\.[\w-]+)+(\/|$)/.test(v)) && /\.[a-z]{2,}(\/|$|:)|^\d+\.\d+\.\d+\.\d+/i.test(v.replace(/^https?:\/\//i, ''));
+  const looksMail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  for (let i = 0; i < w; i++) {
+    if (map[i] !== 'skip') continue;
+    if (!taken.has('url') && ratio(i, looksUrl) >= 0.6) { map[i] = 'url'; taken.add('url'); }
+    else if (!taken.has('username') && ratio(i, looksMail) >= 0.6) { map[i] = 'username'; taken.add('username'); }
+  }
+  // No headers: the most common order is platform, url, username, password
+  if (!header) for (const f of ['name', 'username', 'password']) {
+    if (taken.has(f)) continue;
+    const i = map.indexOf('skip');
+    if (i < 0) break;
+    map[i] = f; taken.add(f);
+  }
+  return map;
+}
+
+/* ---------------- Import: wizard ---------------- */
+
+function openImport() {
+  const st = { step: 1, rows: [], header: false, map: [], merge: true, pasted: '', xlsx: null, sheetIdx: 0, source: '', err: '', tag: '' };
+  const body = h('div', { class: 'dlg-body' });
+  const foot = h('div', { class: 'dlg-foot' });
+  const statusEl = h('p', { class: 'imp-status', role: 'status' });
+  const nextBtn = h('button', { type: 'button', class: 'btn primary md', onclick: () => next() });
+  const backBtn = h('button', { type: 'button', class: 'btn md', onclick: () => { st.step--; render(); } }, 'Back');
+  const cancelBtn = h('button', { type: 'button', class: 'btn md', onclick: closeDialog }, 'Cancel');
+
+  const dataRows = () => (st.header ? st.rows.slice(1) : st.rows);
+  const colName = (i) => { let s = '', n = i + 1; while (n) { s = String.fromCharCode(65 + ((n - 1) % 26)) + s; n = Math.floor((n - 1) / 26); } return s; };
+
+  function setRows(rows, source) {
+    st.rows = tidyRows(rows);
+    st.source = source;
+    st.err = st.rows.length ? '' : 'No data found.';
+    st.header = detectHeader(st.rows);
+    st.map = guessMap(st.rows, st.header);
+  }
+
+  function plan() {
+    const cols = (f) => st.map.reduce((a, m, i) => (m === f ? a.concat(i) : a), []);
+    const C = Object.fromEntries(FIELDS.map(([f]) => [f, cols(f)]));
+    const one = (r, f) => { for (const i of C[f]) { const v = (r[i] || '').trim(); if (v) return v; } return ''; };
+    const many = (r, f) => C[f].map((i) => (r[i] || '').trim()).filter(Boolean);
+    const keyOf = (name, url) => { const p = parseUrl(url); return p ? 'h:' + p.host : url ? 'u:' + norm(url) : 'n:' + norm(name); };
+    const existing = new Map();
+    for (const e of S.data.entries) { const k = keyOf(e.name, e.url); if (!existing.has(k)) existing.set(k, e); }
+    const same = (accs, a) => accs.some((x) => x.username === a.username && x.password === a.password);
+    const fresh = new Map(), adds = new Map();
+    let dups = 0, skipped = 0, ok = 0;
+    for (const r of dataRows()) {
+      const url = one(r, 'url');
+      let name = one(r, 'name');
+      const acc = { label: one(r, 'label'), username: one(r, 'username'), password: one(r, 'password'), notes: many(r, 'notes').join('\n') };
+      const tags = many(r, 'tags').flatMap((t) => t.split(/[,;]/)).map((t) => t.trim()).filter(Boolean);
+      if (!acc.username && !acc.password) { skipped++; continue; }
+      if (!name) name = guessName(parseUrl(url)) || url;
+      if (!name) { skipped++; continue; }
+      const key = keyOf(name, url);
+      const ex = existing.get(key);
+      if (ex && same(ex.accounts, acc)) { dups++; continue; }
+      if (st.merge && ex) {
+        const slot = adds.get(ex) || { entry: ex, accounts: [], tags: [] };
+        if (same(slot.accounts, acc)) { dups++; continue; }
+        if (!acc.label && norm(name) !== norm(ex.name)) acc.label = name;
+        slot.accounts.push(acc); slot.tags.push(...tags); adds.set(ex, slot); ok++;
+        continue;
+      }
+      const fk = st.merge ? key : key + '#' + ok;
+      let f = fresh.get(fk);
+      if (!f) { f = { name, url, tags: [], accounts: [] }; fresh.set(fk, f); }
+      else {
+        if (same(f.accounts, acc)) { dups++; continue; }
+        if (!acc.label && norm(name) !== norm(f.name)) acc.label = name;
+      }
+      f.accounts.push(acc); f.tags.push(...tags); ok++;
+    }
+    const uniq = (a) => [...new Set(a)];
+    const fr = [...fresh.values()].map((f) => ({ ...f, tags: uniq(f.tags) }));
+    const ad = [...adds.values()].map((s) => ({ ...s, tags: uniq(s.tags) }));
+    return {
+      fresh: fr, adds: ad, dups, skipped, ok, total: dataRows().length,
+      multi: fr.filter((f) => f.accounts.length > 1).length,
+      addAccs: ad.reduce((n, s) => n + s.accounts.length, 0),
+      hasPw: C.password.length > 0, hasId: C.name.length + C.url.length > 0,
+    };
+  }
+
+  function statsCard(p, title) {
+    const stat = (label, n, cls) => h('div', { class: 'stat' + (cls ? ' ' + cls : '') }, h('span', null, label), h('b', null, String(n)));
+    return h('div', { class: 'stats' },
+      h('h3', null, title),
+      stat('New entries', p.fresh.length),
+      p.multi ? stat('With 2+ accounts', p.multi) : null,
+      p.addAccs ? stat('Added to existing entries', p.addAccs) : null,
+      p.dups ? stat('Already in the vault, skipped', p.dups, 'warn') : null,
+      p.skipped ? stat('No username or password, skipped', p.skipped, 'warn') : null,
+      !p.hasPw ? h('p', { class: 'hint', style: 'margin:0;color:var(--warn-ink)' }, 'No column is set to "Password".') : null,
+      !p.hasId ? h('p', { class: 'hint', style: 'margin:0;color:var(--warn-ink)' }, 'Pick a "Platform" or "URL" column.') : null);
+  }
+
+  function stepsBar() {
+    const names = ['Paste', 'Map columns', 'Review'];
+    return h('ol', { class: 'steps', 'aria-label': 'Steps' }, names.map((n, i) => [
+      i ? h('li', { class: 'bar', 'aria-hidden': 'true' }) : null,
+      h('li', { class: i + 1 < st.step ? 'done' : i + 1 === st.step ? 'cur' : '', 'aria-current': i + 1 === st.step ? 'step' : null },
+        h('span', { class: 'dot' }, i + 1 < st.step ? icon('check', 12) : String(i + 1)), n)]));
+  }
+
+  function updateStatus() {
+    statusEl.className = 'imp-status' + (st.err ? ' bad' : '');
+    fill(statusEl,
+      st.err ? [icon('alert', 16), st.err]
+        : st.rows.length ? [icon('check', 16), `${st.source}: ${plural(st.rows[0].length, 'column', 'columns')}, ${plural(st.rows.length, 'row', 'rows')}`]
+          : null);
+    nextBtn.disabled = !st.rows.length;
+  }
+
+  async function handleFile(file) {
+    if (!file) return;
+    st.err = ''; st.xlsx = null; st.sheetIdx = 0;
+    try {
+      const buf = await file.arrayBuffer();
+      const u8 = new Uint8Array(buf.slice(0, 4));
+      if (u8[0] === 0xd0 && u8[1] === 0xcf && u8[2] === 0x11 && u8[3] === 0xe0) {
+        st.rows = [];
+        st.err = 'This is an old .xls or a password-protected file. Save it as .xlsx without a password, or copy and paste instead.';
+      } else if (u8[0] === 0x50 && u8[1] === 0x4b) {
+        st.xlsx = await readXlsx(buf);
+        let rows = [];
+        for (let i = 0; i < st.xlsx.sheets.length; i++) { rows = tidyRows(await st.xlsx.load(i)); if (rows.length) { st.sheetIdx = i; break; } }
+        setRows(rows, file.name);
+      } else {
+        setRows(parseDelimited(decodeText(buf)), file.name);
+      }
+    } catch {
+      st.rows = []; st.err = 'Could not read the file. Try copying and pasting from Excel instead.';
+    }
+    st.pasted = '';
+    if (UI.impTa) UI.impTa.value = '';
+    updateStatus();
+    if (st.rows.length) { st.step = 2; render(); }
+  }
+
+  function renderStep1() {
+    const ta = UI.impTa = h('textarea', { class: 'input mono', id: 'imp-ta', rows: 9, spellcheck: 'false', autocomplete: 'off', placeholder: 'In Excel: select the cells including the headers, Ctrl C.\nHere: Ctrl V.' });
+    ta.value = st.pasted;
+    ta.addEventListener('input', () => {
+      st.pasted = ta.value; st.xlsx = null; st.err = '';
+      if (ta.value.trim()) setRows(parseDelimited(ta.value), 'Pasted data'); else { st.rows = []; }
+      updateStatus();
+    });
+    const fileIn = h('input', { type: 'file', accept: '.xlsx,.csv,.tsv,.txt', onchange: (e) => handleFile(e.target.files[0]) });
+    const drop = h('label', { class: 'drop' }, fileIn, icon('sheet', 28), h('strong', null, 'Choose a file'), h('span', null, '.xlsx or .csv · or drop it here'));
+    drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
+    fill(body, stepsBar(),
+      h('div', { class: 'grid2', style: 'grid-template-columns:minmax(0,3fr) minmax(0,2fr)' },
+        h('div', { class: 'field' }, h('label', { for: 'imp-ta' }, 'Paste from Excel'), ta),
+        h('div', { class: 'field' }, h('span', { style: 'font-size:13px;font-weight:600' }, 'Or from a file'), drop)),
+      statusEl,
+      h('div', { class: 'note' }, icon('shield', 18), h('span', null, 'The file is read only here, in your browser. It is never uploaded anywhere.')));
+    fill(nextBtn, 'Continue', kbd('Ctrl ↵'));
+    fill(foot, h('span', { class: 'hint' }, kbd('Esc'), ' cancel'), h('div', { class: 'end' }, cancelBtn, nextBtn));
+    updateStatus();
+    setTimeout(() => ta.focus());
+  }
+
+  function renderStep2() {
+    const rows = st.rows, w = rows[0].length, p = plan();
+    const data = dataRows(), preview = data.slice(0, 6);
+    const heads = rows[0].map((c, i) => {
+      const sel = h('select', { class: 'select' + (st.map[i] !== 'skip' ? ' set' : ''), 'aria-label': `What column ${colName(i)} contains`,
+        onchange: (e) => { st.map[i] = e.target.value; renderStep2(); const el = body.querySelectorAll('.imp-head select')[i]; if (el) el.focus(); } },
+        FIELDS.map(([v, t]) => h('option', { value: v }, t)));
+      sel.value = st.map[i];
+      return h('div', { class: 'imp-head' }, h('span', { title: st.header ? c : '' }, `Column ${colName(i)}${st.header && c.trim() ? ` · "${c.trim()}"` : ''}`), sel);
+    });
+    const cells = preview.flatMap((r) => r.map((v, i) => {
+      const f = st.map[i];
+      const shown = f === 'password' && v ? '•'.repeat(8) : v;
+      return h('div', { class: 'imp-cell' + (f === 'skip' ? ' off' : ''), title: f === 'password' ? '' : v }, shown);
+    }));
+    const grid = h('div', { class: 'imp-grid', style: `grid-template-columns:repeat(${w},minmax(150px,1fr))` }, heads, cells,
+      data.length > preview.length ? h('div', { class: 'imp-more' }, `+ ${plural(data.length - preview.length, 'more row', 'more rows')}`) : null);
+
+    const headerCb = h('input', { type: 'checkbox', checked: st.header, onchange: (e) => { st.header = e.target.checked; renderStep2(); const el = body.querySelector('.imp-opts input'); if (el) el.focus(); } });
+    let sheetSel = null;
+    if (st.xlsx && st.xlsx.sheets.length > 1) {
+      sheetSel = h('select', { class: 'select', style: 'width:auto', 'aria-label': 'Sheet', onchange: async (e) => {
+        st.sheetIdx = Number(e.target.value);
+        setRows(await st.xlsx.load(st.sheetIdx), st.source);
+        if (!st.rows.length) { st.err = 'This sheet is empty.'; st.step = 1; }
+        render();
+      } }, st.xlsx.sheets.map((s, i) => h('option', { value: String(i) }, s.name)));
+      sheetSel.value = String(st.sheetIdx);
+    }
+
+    fill(body, stepsBar(),
+      h('p', { class: 'lead', style: 'font-size:14px' }, `${plural(w, 'column', 'columns')} and ${plural(data.length, 'row', 'rows')}. Tell us what each column contains.`),
+      h('div', { class: 'imp-opts' },
+        h('label', { class: 'check' }, headerCb, h('span', null, 'First row contains headers')),
+        sheetSel ? h('label', { style: 'display:flex;align-items:center;gap:8px;font-size:13px' }, 'Sheet', sheetSel) : null),
+      h('div', { class: 'imp-wrap' }, h('div', { class: 'imp-table' }, grid), statsCard(p, 'What will happen')));
+    nextBtn.disabled = p.ok === 0;
+    fill(nextBtn, 'Continue to review', kbd('Ctrl ↵'));
+    fill(foot, backBtn, h('div', { class: 'end' }, cancelBtn, nextBtn));
+  }
+
+  function renderStep3() {
+    const p = plan();
+    const mergeCb = h('input', { type: 'checkbox', checked: st.merge, onchange: (e) => { st.merge = e.target.checked; renderStep3(); const el = body.querySelector('.check input'); if (el) el.focus(); } });
+    const tagIn = h('input', { class: 'input', id: 'imp-tag', type: 'text', autocomplete: 'off', placeholder: 'e.g. from-excel', value: st.tag, oninput: (e) => { st.tag = e.target.value; } });
+    const items = [
+      ...p.fresh.map((f) => ({ name: f.name, url: f.url, n: f.accounts.length, what: 'new' })),
+      ...p.adds.map((s) => ({ name: s.entry.name, url: s.entry.url, n: s.accounts.length, what: 'existing' })),
+    ];
+    const list = h('div', { class: 'imp-list' }, items.slice(0, 7).map((it) => {
+      const pp = parseUrl(it.url);
+      return h('div', { class: 'imp-li' },
+        h('span', { class: 'tile', style: `background:${tileColor(it.name)}` }, initial(it.name)),
+        h('span', { class: 'row-txt' }, h('span', { class: 'row-name' }, h('span', null, it.name)), h('span', { class: 'row-url' }, pp ? pp.display : it.url || '·')),
+        h('span', { class: 'badge' }, it.what === 'new' ? plural(it.n, 'account', 'accounts') : `+${plural(it.n, 'account', 'accounts')}`),
+        h('span', { class: 'hint', style: 'width:84px;text-align:right' }, it.what));
+    }), items.length > 7 ? h('div', { class: 'imp-li hint' }, `+ ${items.length - 7} more`) : null);
+
+    fill(body, stepsBar(),
+      h('div', { class: 'imp-wrap' },
+        h('div', { style: 'display:flex;flex-direction:column;gap:16px;min-width:0' },
+          h('label', { class: 'check' }, mergeCb, h('span', null, h('strong', null, 'Merge accounts of the same platform. '), 'Rows with the same URL (or the same name when there is no URL) become one entry with tabs.')),
+          h('div', { class: 'field' }, h('label', { for: 'imp-tag' }, 'Tag everything imported ', h('span', { class: 'hint' }, '(optional, helps you review afterwards)')), tagIn),
+          list),
+        h('div', { style: 'display:flex;flex-direction:column;gap:16px' },
+          statsCard(p, 'Summary'),
+          h('div', { class: 'note warn', style: 'align-items:flex-start' }, icon('alert', 18),
+            h('span', null, 'After importing, delete the Excel file and empty the recycle bin. Otherwise the passwords stay readable on your disk.')))));
+    nextBtn.disabled = p.ok === 0;
+    fill(nextBtn, `Import ${plural(p.ok, 'account', 'accounts')}`, kbd('Ctrl ↵'));
+    fill(foot, backBtn, h('div', { class: 'end' }, cancelBtn, nextBtn));
+  }
+
+  function render() { [renderStep1, renderStep2, renderStep3][st.step - 1](); }
+
+  async function apply() {
+    const p = plan();
+    if (!p.ok) return;
+    const now = Date.now(), tag = st.tag.trim();
+    const withTag = (arr) => [...new Set([...arr, ...(tag ? [tag] : [])])];
+    const mk = (a) => ({ id: uid(), label: a.label, username: a.username, password: a.password, notes: a.notes, changed: now });
+    for (const f of p.fresh) S.data.entries.push({ id: uid(), name: f.name, url: f.url, tags: withTag(f.tags), favorite: false, created: now, updated: now, accounts: f.accounts.map(mk) });
+    for (const s of p.adds) { s.entry.accounts.push(...s.accounts.map(mk)); s.entry.tags = withTag([...(s.entry.tags || []), ...s.tags]); s.entry.updated = now; }
+    closeDialog();
+    S.view.selId = null; S.view.q = ''; if (UI.search) UI.search.value = '';
+    S.view.filter = tag ? { type: 'tag', value: tag } : { type: 'all' };
+    await commit();
+    toast(`Imported ${plural(p.ok, 'account', 'accounts')}. Now delete the Excel file.`, 5000);
+  }
+
+  function next() {
+    if (nextBtn.disabled) return;
+    if (st.step < 3) { st.step++; render(); } else apply();
+  }
+
+  openDialog({ title: 'Import from Excel', body, foot, wide: true, submit: next, onClose: () => { st.rows = []; st.pasted = ''; UI.impTa = null; } });
+  render();
+}
+
+/* ---------------- Global events ---------------- */
+
+let lastBump = 0;
+for (const ev of ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel']) {
+  window.addEventListener(ev, () => { const n = Date.now(); if (n - lastBump > 1000) { lastBump = n; bump(); } }, { passive: true });
+}
+
+document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey;
+  const k = e.key.toLowerCase();
+  if (mod && k === 's') { e.preventDefault(); if (S.payload && (S.dirty || S.data)) save(); return; }
+  if (!S.data) return;
+  if (S.dialog) {
+    if (e.key === 'Escape') { e.preventDefault(); closeDialog(); }
+    else if (mod && e.key === 'Enter') { e.preventDefault(); S.dialog.submit(); }
+    return;
+  }
+  if ((mod && k === 'k') || (e.key === '/' && !isTyping(e.target))) { e.preventDefault(); UI.search.focus(); UI.search.select(); }
+  else if (k === 'n' && !mod && !e.altKey && !isTyping(e.target)) { e.preventDefault(); openEntryDialog('new'); }
+  else if (e.key === 'Escape' && S.view.selId && !isTyping(e.target)) { S.view.selId = null; renderList(); renderDetail(); }
+});
+
+window.addEventListener('beforeunload', (e) => { if (S.dirty) { e.preventDefault(); e.returnValue = ''; } });
+setInterval(tick, 1000);
+
+/* ---------------- Startup ---------------- */
+
+UI.app = document.getElementById('app');
+document.body.append(toastEl);
+if (!window.crypto || !crypto.subtle) {
+  UI.app.append(h('div', { class: 'lock' }, h('div', { class: 'lock-card' }, h('h1', null, 'Not supported'),
+    h('p', { class: 'lead' }, 'This browser has no Web Crypto. Open the file in a recent Chrome, Edge or Firefox.'))));
+  return;
+}
+renderLock();
+})();
+</script>
+</body>
+</html>
