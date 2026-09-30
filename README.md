@@ -162,3 +162,7 @@ Decrypted, `ct` is:
 ## License
 
 MIT
+
+## Credits
+
+Built by [Akis Tsimpogiannis](https://github.com/xtsimpo), with [Claude](https://claude.ai) as design and coding partner.
