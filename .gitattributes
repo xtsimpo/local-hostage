@@ -1,0 +1,4 @@
+# The CSP hash is computed with LF line endings. Do not let git change them.
+*.html text eol=lf
+*.py text eol=lf
+*.md text eol=lf
