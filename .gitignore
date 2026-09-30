@@ -1,0 +1,4 @@
+# Never put real vaults in the repo
+vault-*.html
+*-vault.html
+*.bak.html
