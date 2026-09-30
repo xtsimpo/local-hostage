@@ -30,6 +30,20 @@ One file, everything inside. Copy it to a USB stick, to your company OneDrive, w
 **Chrome / Edge:** on the first save you pick where the file goes. After that it saves automatically on every change.
 **Firefox:** every save downloads a new copy. Keep only the latest one.
 
+## Updating to a new version
+
+Your vault file carries its own copy of the app, frozen at the version you saved it with. A new release does not change it. To update:
+
+1. Download the new `vault.html` from the official repo.
+2. Open it and click **Open vault file**. Pick your existing vault (or drag it onto the window).
+3. Unlock it with your usual master password.
+4. Click **Save and upgrade**.
+
+**Chrome / Edge:** your file is overwritten in place with the new version (the browser asks once for permission).
+**Firefox:** a new copy downloads. Replace your old file with it.
+
+Only the encrypted data is read from your old file. None of its code runs. Your master password and your data stay the same.
+
 ## Importing from Excel
 
 Three ways in:
@@ -140,6 +154,7 @@ Decrypted, `ct` is:
 - [x] Password generator, reuse check
 - [x] Import from Excel (.xlsx, .csv, paste) with column mapping
 - [x] English UI
+- [x] Open an existing vault file and upgrade it to the current version
 - [ ] Export to CSV (with an explicit warning)
 - [ ] Greek UI as an option
 - [ ] Argon2id instead of PBKDF2

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-K5p2D0JQsSD1/X/WQ3vN7JYSFfH9TcXm0yCGs74RM3A='; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-zKzLn7izhuYRKkq19rP0kagHv1s3AHJnawBK+4sv78s='; style-src 'unsafe-inline'; img-src data:; form-action 'none'; base-uri 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Local Hostage</title>
 <style>
@@ -70,7 +70,7 @@ textarea.input{height:auto;padding:10px 12px;resize:vertical;min-height:72px;lin
 .side .brand{justify-content:space-between;padding:0 6px}
 .side .brand>div{display:flex;align-items:center;gap:10px}
 .side .logo{width:30px;height:30px;border-radius:8px}
-.side .brand b{font-size:15px}
+.side .brand b{font-size:16px;white-space:nowrap}
 .navgrp{display:flex;flex-direction:column;gap:2px}
 .navhead{padding:0 10px 6px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .nav-item{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;text-align:left;width:100%}
@@ -83,7 +83,7 @@ textarea.input{height:auto;padding:10px 12px;resize:vertical;min-height:72px;lin
 .nav-item>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tags{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px}
 .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
-.side-foot .btn{justify-content:flex-start}
+.side-foot .btn{justify-content:flex-start;white-space:normal;height:auto;min-height:40px;padding:8px 12px;text-align:left}
 
 .main{display:flex;flex-direction:column;min-width:0;min-height:0}
 .topbar{display:flex;gap:10px;align-items:center;padding:18px 20px 14px}
@@ -147,6 +147,10 @@ textarea.input{height:auto;padding:10px 12px;resize:vertical;min-height:72px;lin
 .d-empty{margin:auto;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center;max-width:240px}
 .d-empty p{margin:0}
 .d-close{display:none}
+.openbox{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.openbox>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.linkbtn.plain{font-family:var(--sans);font-size:13px;font-weight:600}
+.lock.over .lock-card{outline:2px dashed var(--accent);outline-offset:16px;border-radius:12px}
 
 .overlay{position:fixed;inset:0;background:rgba(20,20,20,.45);display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;overflow:auto;z-index:20}
 .dialog{width:100%;max-width:640px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column}
@@ -246,7 +250,7 @@ select{font:inherit;color:inherit}
 // Every save builds the new file from it.
 const TEMPLATE = '<!doctype html>\n' + document.documentElement.outerHTML;
 
-const VERSION = '0.3.1';
+const VERSION = '0.4.0';
 const KDF_ITER = 600000;              // PBKDF2-SHA256, OWASP recommendation
 const AUTO_LOCK_MS = 5 * 60 * 1000;
 const CLIP_CLEAR_MS = 20 * 1000;
@@ -298,12 +302,15 @@ const S = {
   data: null,               // decrypted data, only while unlocked
   dirty: false, isNew: false, saving: false,
   fileHandle: null, lastSaved: null,
+  autosaveOk: false,         // true once we know we may write to fileHandle without asking
+  source: null,              // { name, version, upgrade } when a vault was opened from another file
   fileName: (() => { try { return decodeURIComponent(location.pathname.split('/').pop()) || 'vault.html'; } catch { return 'vault.html'; } })(),
   lockAt: 0, dialog: null,
   view: null,
 };
 function freshView() { return { filter: { type: 'all' }, q: '', selId: null, acc: {}, reveal: false }; }
 S.view = freshView();
+S.embedded = S.payload; S.embeddedName = S.fileName;
 const UI = {};
 
 /* ---------------- DOM helpers ---------------- */
@@ -500,11 +507,13 @@ async function doSave(forceNew, silent) {
       S.saving = true; refreshFoot();
       const w = await S.fileHandle.createWritable();
       await w.write(blob); await w.close();
+      S.autosaveOk = true;
       afterSave(silent ? null : 'Saved to file');
       return;
     } catch (e) {
       S.saving = false; refreshFoot();
       if (e && e.name === 'AbortError') return;
+      if (silent) return; // autosave could not write (e.g. no permission yet): keep the changes, wait for a manual save
       S.fileHandle = null;
     }
   }
@@ -514,13 +523,17 @@ async function doSave(forceNew, silent) {
   afterSave('Downloaded a new copy. Replace your old file with it.');
 }
 function afterSave(msg) {
+  if (S.source && S.source.upgrade) {
+    S.source.upgrade = false;
+    if (msg) msg = S.fileHandle ? `Upgraded ${S.fileName} to v${VERSION}` : 'Downloaded the upgraded file. Replace your old file with it.';
+  }
   S.dirty = false; S.isNew = false; S.saving = false; S.lastSaved = new Date();
   if (S.data) { renderBanner(); refreshFoot(); } else renderLock();
   if (msg) toast(msg, 3200);
 }
 let autoT;
 function scheduleAutosave() {
-  if (!S.fileHandle) return;
+  if (!S.fileHandle || !S.autosaveOk) return;
   clearTimeout(autoT);
   autoT = setTimeout(() => save(false, true), 700);
 }
@@ -545,7 +558,7 @@ function lock(reason) {
   renderLock(reason);
 }
 
-function renderLock(reason) {
+function renderLock(reason, error) {
   UI.shell = null;
   const creating = !S.payload;
   const pw = h('input', { id: 'mp', type: 'password', autocomplete: creating ? 'new-password' : 'current-password', spellcheck: 'false', class: 'mono' });
@@ -579,6 +592,7 @@ function renderLock(reason) {
         const data = await decryptData(key, S.payload);
         S.key = key; S.salt = salt; S.iter = iter; S.data = data;
         if (!Array.isArray(S.data.entries)) S.data.entries = [];
+        if (S.source && S.source.upgrade) S.dirty = true;
       }
     } catch {
       btn.disabled = false; btn.replaceChildren(icon('unlock', 18), btnLabel);
@@ -604,18 +618,93 @@ function renderLock(reason) {
     h('span', { style: 'flex:1' }, 'There are changes that have not been written to the file yet.'),
     h('button', { class: 'btn', type: 'button', onclick: () => save() }, 'Save')) : null;
 
+  const src = S.source;
+  const sourceNote = src ? h('div', { class: 'note' }, icon('info', 18),
+    h('span', { style: 'flex:1' },
+      src.upgrade
+        ? `Opened ${src.name}, saved with ${src.version ? 'v' + src.version : 'an older version'}. Unlock it, then save to upgrade it to v${VERSION}.`
+        : `Opened ${src.name}.`,
+      ' ', h('button', { type: 'button', class: 'linkbtn plain', onclick: closeOpenedFile }, 'Close this file'))) : null;
+  const openBox = creating ? h('div', { class: 'openbox' },
+    h('div', null, h('strong', null, 'Already have a vault?'), h('span', { class: 'hint' }, 'Open your file to unlock it here, or to update it to this version.')),
+    h('button', { class: 'btn', type: 'button', onclick: pickVaultFile }, icon('upload', 16), 'Open vault file')) : null;
+  const openLink = !creating ? h('div', { style: 'display:flex;justify-content:center' },
+    h('button', { type: 'button', class: 'linkbtn plain', onclick: pickVaultFile }, 'Open a different vault file')) : null;
+
   const card = h('form', { class: 'lock-card', onsubmit: onSubmit, novalidate: true },
     h('div', { class: 'brand' }, h('div', { class: 'logo' }, icon('key', 20)), h('div', null, h('b', null, 'Local Hostage'), h('small', null, S.fileName))),
     h('div', { style: 'display:flex;flex-direction:column;gap:10px' },
       h('h1', null, creating ? 'New vault' : 'Welcome back.'),
       h('p', { class: 'lead' }, creating ? 'Choose a master password. It is the only one you will need to remember.' : 'Enter your master password to open the vault.')),
     reason === 'auto' ? h('p', { class: 'hint', style: 'margin:0' }, 'Locked automatically after 5 minutes of inactivity.') : null,
+    sourceNote,
+    openBox,
     dirtyNote,
     ...fields,
+    openLink,
     h('div', { class: 'note' }, icon('shield', 18), h('span', null, 'Nothing leaves this computer. No network, no cloud, no account. Everything is encrypted inside this file.')));
 
-  fill(UI.app, h('div', { class: 'lock' }, card));
+  const wrap = h('div', { class: 'lock' }, card);
+  wrap.addEventListener('dragover', (e) => { e.preventDefault(); wrap.classList.add('over'); });
+  wrap.addEventListener('dragleave', (e) => { if (e.target === wrap) wrap.classList.remove('over'); });
+  wrap.addEventListener('drop', (e) => {
+    e.preventDefault(); wrap.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f && okToLeave()) openVaultFile(f, null);
+  });
+  fill(UI.app, wrap);
+  if (error) err.textContent = error;
   pw.focus();
+}
+
+/* ---------------- Opening another vault file (and upgrading it) ---------------- */
+
+const vaultFileIn = h('input', { type: 'file', accept: '.html,.htm', hidden: true,
+  onchange: (e) => { const f = e.target.files[0]; e.target.value = ''; if (f) openVaultFile(f, null); } });
+
+function okToLeave() {
+  return !S.dirty || !S.payload || confirm('The current vault has changes that are not saved to a file. Open another file anyway?');
+}
+
+async function pickVaultFile() {
+  if (!okToLeave()) return;
+  if (window.showOpenFilePicker) {
+    try {
+      const [handle] = await window.showOpenFilePicker({ types: [{ description: 'Local Hostage vault', accept: { 'text/html': ['.html', '.htm'] } }] });
+      openVaultFile(await handle.getFile(), handle);
+      return;
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  vaultFileIn.click();
+}
+
+// Reads only the encrypted data out of another file. Nothing from that file is ever executed.
+async function openVaultFile(file, handle) {
+  if (S.data) return; // only from the lock screen
+  let error = null;
+  try {
+    if (file.size > 50 * 1024 * 1024) throw new Error('big');
+    const text = await file.text();
+    const m = text.match(/<script[^>]*id="vault-data"[^>]*>([\s\S]*?)<\/script>/);
+    if (!m) throw new Error('not-vault');
+    const p = JSON.parse(m[1].trim());
+    if (p === null) throw new Error('empty');
+    if (!p || !FORMATS_READ.includes(p.format) || ![p.salt, p.iv, p.ct].every((x) => typeof x === 'string')) throw new Error('not-vault');
+    const vm = text.match(/const VERSION = '([^']{1,20})'/);
+    const from = vm ? vm[1] : null;
+    Object.assign(S, { payload: p, fileHandle: handle, autosaveOk: false, fileName: file.name, dirty: false, isNew: false, lastSaved: null,
+      source: { name: file.name, version: from, upgrade: from !== VERSION } });
+  } catch (e) {
+    error = e.message === 'empty' ? `${file.name} has no vault in it yet. It is an empty copy of the app.`
+      : e.message === 'big' ? 'That file is too large to be a vault.'
+        : `${file.name} is not a Local Hostage vault.`;
+  }
+  renderLock(null, error);
+}
+
+function closeOpenedFile() {
+  Object.assign(S, { payload: S.embedded, fileName: S.embeddedName, fileHandle: null, autosaveOk: false, source: null, dirty: false, isNew: false, lastSaved: null });
+  renderLock();
 }
 
 /* ---------------- Main screen ---------------- */
@@ -695,14 +784,19 @@ function renderBanner() {
   B.replaceChildren();
   const fs = !!window.showSaveFilePicker;
   let text = null;
+  let upgrade = false;
   if (S.dirty) {
-    if (S.isNew) text = 'New vault: save it to a file so it is not lost.';
+    if (S.source && S.source.upgrade) {
+      upgrade = true;
+      text = `${S.fileName} was saved with ${S.source.version ? 'v' + S.source.version : 'an older version'}. Save it to upgrade it to v${VERSION}.`
+        + (S.fileHandle ? '' : ' A new copy will download: replace your old file with it.');
+    } else if (S.isNew) text = 'New vault: save it to a file so it is not lost.';
     else if (!S.fileHandle && fs) text = `On the first save, pick this same file (${S.fileName}) to overwrite it. After that it saves on its own.`;
     else if (!fs) text = 'This browser cannot write to files directly: every save downloads a new copy. Keep only the latest one.';
   }
   B.hidden = !text;
   if (text) B.append(h('div', { class: 'note warn' }, icon('alert', 18), h('span', { style: 'flex:1' }, text),
-    h('button', { class: 'btn', type: 'button', onclick: () => save() }, icon('save', 16), S.isNew ? 'Save as…' : 'Save')));
+    h('button', { class: 'btn', type: 'button', onclick: () => save() }, icon('save', 16), S.isNew ? 'Save as…' : upgrade ? 'Save and upgrade' : 'Save')));
 }
 
 function visibleEntries() {
@@ -1493,7 +1587,7 @@ setInterval(tick, 1000);
 /* ---------------- Startup ---------------- */
 
 UI.app = document.getElementById('app');
-document.body.append(toastEl);
+document.body.append(toastEl, vaultFileIn);
 if (!window.crypto || !crypto.subtle) {
   UI.app.append(h('div', { class: 'lock' }, h('div', { class: 'lock-card' }, h('h1', null, 'Not supported'),
     h('p', { class: 'lead' }, 'This browser has no Web Crypto. Open the file in a recent Chrome, Edge or Firefox.'))));
